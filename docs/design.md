@@ -147,7 +147,9 @@ Laid out top to bottom (2026-10-29):
   it moves in whole steps (snaps to the nearest step as it's dragged) and sets the key's `Step`
   parameter as one gesture. Dragging past the top lands on step N, the next origin.
 - **The other keys** (proposed): a small mark on the circle at each one's step, so the whole map is
-  visible; keys out of order or sharing a step are tinted on the piano.
+  visible; keys out of order or sharing a step are tinted on the piano. **Clicking a mark selects its
+  key** (2026-10-29), as clicking the piano key would, and the mark can then be dragged; a click alone
+  leaves the step as it is. Clicking the ring away from any mark moves the selected key there.
 - **Read-out** for the selected key: its step and its offset in cents from the key's 12-TET pitch
   ("C → step 5 of 19, 316¢, +16¢").
 - **Controls:** EDO knob, Origin dropdown, Fill dropdown and a "Fill all keys" button (refills with

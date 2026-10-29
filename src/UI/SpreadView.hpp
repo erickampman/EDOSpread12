@@ -6,7 +6,8 @@
 //   key from the origin, dark for a black key and light for a white one, breaking where Fill puts
 //   them (Nearest: each key's 12-TET pitch ±50¢; Floor: from it up to the next key's).
 // - Each key's step is a mark on the circle, named; the selected key's is the indicator, which is
-//   dragged round in whole steps (past the top from the left is step N, the octave above).
+//   dragged round in whole steps (past the top from the left is step N, the octave above). Clicking
+//   a mark selects its key.
 // - The piano: one octave from the origin, laid out straight. A click selects a key; a curve joins
 //   it to its indicator. A key out of order or sharing a step is tinted; a held key is lit.
 // - Button: a plain push button, for Fill (a refill with the current choice).
@@ -241,10 +242,24 @@ protected:
             repaint();
             return true;
         }
-        // The indicator, or anywhere on the ring: the selected key's step follows the pointer.
-        float ix, iy; markPoint(fSelected, ix, iy);
+        // A key's mark selects that key, as its piano key would, and can then be dragged; it stays
+        // on its step until the pointer moves.
+        const int mark = markAt(x, y);
+        if (mark >= 0)
+        {
+            if (mark != fSelected)
+            {
+                fSelected = mark;
+                fCallback->keySelected(mark);
+                repaint();
+            }
+            fDragging = true;
+            fCallback->stepDragStarted(fSelected);
+            return true;
+        }
+        // Elsewhere on the ring: the selected key's step follows the pointer.
         const float r = std::hypot(x - fCx, y - fCy);
-        if (std::hypot(x - ix, y - iy) <= 14.0f * fUiScale || (r >= fMarkR - 22.0f * fUiScale && r <= fR + 8.0f * fUiScale))
+        if (r >= fMarkR - 22.0f * fUiScale && r <= fR + 8.0f * fUiScale)
         {
             fDragging = true;
             fCallback->stepDragStarted(fSelected);
@@ -319,6 +334,20 @@ private:
                 if (px >= x && px <= x + w && py >= y && py <= y + h) return d;
             }
         return -1;
+    }
+    // The mark under the pointer, nearest first; on a shared step the selected key's (it's on top).
+    int markAt(float px, float py) const
+    {
+        int   best  = -1;
+        float bestD = 0.0f;
+        for (int d = 0; d < 12; ++d)
+        {
+            float x, y; markPoint(d, x, y);
+            const float dist = std::hypot(px - x, py - y);
+            if (dist > (d == fSelected ? 14.0f : 10.0f) * fUiScale) continue;
+            if (best < 0 || dist < bestD || (dist == bestD && d == fSelected)) { best = d; bestD = dist; }
+        }
+        return best;
     }
 
     // Out of order (below the key before it, or above the key after it), or on another key's step.
