@@ -51,7 +51,9 @@
 - [x] Refill in the editor as one gesture (EDO turned, Fill chosen, the button); automation clamps, doesn't refill
 - [x] Held keys lit on the piano and the circle (plugin_gui.h's es_held_keys)
 - [x] Tried in tools/preview_editor.mm ("EDOSpread12 Preview.app"): select, drag, Fill, EDO, Origin (2026-10-29)
-- [ ] Seen with notes playing in StageHand and Bitwig (held keys lit; automation shown)
+- [x] Seen working in a host with notes playing (2026-10-29)
+- [ ] A host's own change to EDO (an automation lane, or its parameter list) moves the knob and leaves the steps alone (clamped to 0 … N), as docs/design.md says
+- [ ] StageHand: host-side parameter control (automation, or mapping a controller to a plugin parameter); StageHand's work
 
 ## M5: Other formats (clap-wrapper)
 - [ ] clap-wrapper and the VST3 SDK as submodules (`tools/fetch_deps.sh`), `EDOSPREAD12_BUILD_VST3`, `EDOSPREAD12_BUILD_AUV2`
