@@ -3,17 +3,15 @@
 ## Tests
 - all: cmake -S . -B build -G Ninja && ninja -C build && ctest --test-dir build --output-on-failure
 - validator: clap-validator validate build/EDOSpread12.clap (35 pass, 9 skipped: no presets or audio ports)
-- install: ninja -C build install-clap (symlinked); install-vst3 and install-auv2 come with M5
-- au: auval -v aumi ESpr nLKL
+- install: ninja -C build install-clap (symlinked)
 - preview: open -n "build/EDOSpread12 Preview.app" --args "$PWD/build/EDOSpread12.clap" [id=value ...] (the editor alone, macOS)
-- vst3: Steinberg's validator (built from external/vst3sdk) on build/EDOSpread12.vst3
 
 ## M0: Plan
 - [x] docs/design.md: 12-entry map from the origin, repeating by octave; EDO 1–96; free order; output as Retune (2026-10-29)
 - [x] MIDI 1.0 in, fraction out: sent as MIDI 2.0, as NoteGran Chords (2026-10-29)
 - [x] Fill: Floor | Nearest; Even spread dropped, as it is 12-EDO spacing (2026-10-29)
 - [x] Open questions settled: steps 0 … N, refill in the editor only, table from the origin, shared code through uw-core (2026-10-29)
-- [ ] AU subtype code (`ESpr` proposed)
+- [x] CLAP only for now: no VST3, AUv2 deferred (2026-10-29; docs/design.md, Form)
 - [x] Private repo erickampman/EDOSpread12
 
 ## M1: Core library
@@ -55,10 +53,9 @@
 - [ ] A host's own change to EDO (an automation lane, or its parameter list) moves the knob and leaves the steps alone (clamped to 0 … N), as docs/design.md says
 - [ ] StageHand: host-side parameter control (automation, or mapping a controller to a plugin parameter); StageHand's work
 
-## M5: Other formats (clap-wrapper)
-- [ ] clap-wrapper and the VST3 SDK as submodules (`tools/fetch_deps.sh`), `EDOSPREAD12_BUILD_VST3`, `EDOSPREAD12_BUILD_AUV2`
-- [ ] AUv2 (`aumi`) and VST3, MIDI 1.0 rounded to the nearest key (no promotion under the wrapper); auval and Steinberg's validator pass
-- [ ] Checked in Logic (MIDI FX slot), REAPER and Bitwig
+## M5: Other formats: not now (2026-10-29)
+- CLAP only. VST3 isn't planned: no MIDI-effect category, and every note would be rounded to a semitone.
+- AUv2 deferred: it would load in Logic's MIDI FX slot but play semitones only (see Later: MPE output).
 
 ## M6: Docs
 - [ ] README.md, in Retune's shape: what it does, formats, installing
@@ -67,4 +64,5 @@
 
 ## Later
 - [ ] Map files: save and load tables; Scala `.kbm` import and export
-- [ ] Wrapper patches to keep the fraction in AU and VST3 (shared with Retune's M5)
+- [ ] AUv2 (`aumi`, `ESpr`/`nLKL`) via clap-wrapper, if wanted: Logic and MainStage, semitones only
+- [ ] MPE output (a channel per note, bent to pitch): microtones where MIDI 2.0 can't go, as in Logic

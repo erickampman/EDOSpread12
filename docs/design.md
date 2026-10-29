@@ -4,7 +4,7 @@ A MIDI-in → MIDI-out note effect that **plays an N-EDO from an ordinary 12-key
 the 12 keys in an octave is assigned one step of the EDO's octave, and the table repeats every
 octave. Retune moves every note by the same interval; EDOSpread12 gives every key its own place.
 It is CLAP-first, with the same layout as Retune and NoteGran: a hand-written raw CLAP entry point
-over a pure C++ core, and the vendored free-audio **clap-wrapper** for the other formats.
+over a pure C++ core. **CLAP only for now** (decided 2026-10-29): no VST3 or AUv2 build (Form, below).
 
 EDOSpread12 makes no sound of its own. It changes the notes going to the synth after it.
 
@@ -25,7 +25,7 @@ playing in a host.
 | Filling the table (2026-10-29) | A choice: **Floor** or **Nearest** (below; Even spread dropped 2026-10-29, as it is 12-EDO spacing again). Editing a key by hand afterwards is the normal case |
 | Output (2026-10-29) | **As NoteGran Chords:** the output dialect follows the input (MIDI 2.0 Pitch 7.9, CLAP note + tuning expression), except that a MIDI 1.0 note that lands off a 12-TET key goes out as **MIDI 2.0**, and the host translates it down for a synth that takes only MIDI 1.0 |
 | Editor (2026-10-29) | A step circle, as Chords' degree circle, for now. It must show plainly where each step sits against the 12-TET keys (below) |
-| Form | CLAP note effect, then VST3 and AUv2 via clap-wrapper (MIDI 1.0, rounded), as Retune |
+| Form (2026-10-29) | **CLAP only, for now.** No VST3: it has no MIDI-effect category (clap-wrapper makes a note effect an instrument), and the wrapper sends note on/off only, tuning 0, so every note is rounded. AUv2 deferred: an `aumi` MIDI effect loads in Logic and MainStage, but the wrapper turns MIDI 2.0 into MIDI 1.0 by key alone and Logic carries no MIDI 2.0 pitch between plugins, so it would play semitones only. Microtones in Logic would need an MPE output mode (Later) |
 | Deliverables | README.md, BUILDING.md, THIRD_PARTY_NOTICES.md, docs/design.md, MILESTONES.md, as the other plugins |
 
 ## The mapping
@@ -101,7 +101,7 @@ rule.
     MIDI 2.0 on to the synth (StageHand). A host that converts it down to MIDI 1.0 for the synth plays
     it as 12-EDO anyway (NoteGran found REAPER on Linux does, 2026-10-24); nothing is lost there
     against rounding.
-  - **Under clap-wrapper** (VST3, AUv2) MIDI 1.0 stays rounded to the nearest key, as Retune's M4: the
+  - **Under clap-wrapper** (VST3, AUv2; not built now, the code kept for a later AUv2) MIDI 1.0 stays rounded to the nearest key, as Retune's M4: the
     AUv2 wrapper's MIDI 2.0 → 1.0 conversion keeps only the key, which rounds down, and the VST3
     wrapper sends CLAP notes, which `ClapNotes` already rounds.
 - **An incoming pitch moves with the key.** A MIDI 2.0 Note On that already carries Pitch 7.9 keeps
@@ -168,10 +168,10 @@ Laid out top to bottom (2026-10-29):
   (uw::clap-notes) take a shift per key, and NoteRemap does the MIDI 1.0 promotion (off for Retune).
   Retune uses them since b63211d. EDOSpread12's own code is the mapping alone (`SpreadCore`).
   NoteGran's own copies (its OwnedNotes and CLAP output) could follow later; not part of this plan.
-- **clap-wrapper** and the VST3 SDK as submodules, as Retune's M4: `EDOSPREAD12_BUILD_VST3`,
-  `EDOSPREAD12_BUILD_AUV2`, `install-clap`, `install-vst3`, `install-auv2`.
-- **Identity:** CLAP id `com.unlikelyware.edospread12`, vendor Unlikelyware; AUv2 type `aumi`,
-  subtype `ESpr` under `nLKL` (open question 8; `ESpr` unless you say otherwise). State header `EDOSpread12 1`.
+- **No clap-wrapper** for now (CLAP only). A later AUv2 would add it and the VST3 SDK's base as
+  submodules, as Retune's M4, with `install-auv2` beside `install-clap`.
+- **Identity:** CLAP id `com.unlikelyware.edospread12`, vendor Unlikelyware. State header
+  `EDOSpread12 1`. (A later AUv2: type `aumi`, subtype `ESpr` under `nLKL`.)
 - **Repo:** private, `erickampman/EDOSpread12`, as Retune.
 
 ## Phases
@@ -184,12 +184,12 @@ Laid out top to bottom (2026-10-29):
 3. **Heard.** StageHand → EDOSpread12 → StruckSynth (plays Pitch 7.9); Bitwig with a synth that honours
    tuning expressions.
 4. **Editor**, as above.
-5. **VST3 and AUv2** via clap-wrapper, MIDI 1.0 (rounded), auval and Steinberg's validator.
+5. ~~VST3 and AUv2 via clap-wrapper~~: dropped for now, CLAP only (2026-10-29).
 6. **Docs:** README, BUILDING (the shared layout), THIRD_PARTY_NOTICES.
 
 ## Open questions
 
-All settled 2026-10-29 except the AU code:
+All settled 2026-10-29:
 
 1. **Step N allowed: yes,** 0 … N; N is the origin an octave up.
 2. **Even spread: dropped.** It was 12-EDO spacing, the same as Floor.
@@ -198,4 +198,4 @@ All settled 2026-10-29 except the AU code:
 5. **MIDI 1.0 input in a non-12 EDO: as Chords,** a note with a fraction goes out as MIDI 2.0.
 6. **The black and white arcs break where Fill puts them.**
 7. **Retune's latch and dialect code move into uw-core** first, and both plugins use them.
-8. **AU subtype code** `ESpr`, or another? Still open.
+8. **AU subtype code:** moot while there's no AUv2 (`ESpr` if one comes).
