@@ -8,7 +8,8 @@ over a pure C++ core, and the vendored free-audio **clap-wrapper** for the other
 
 EDOSpread12 makes no sound of its own. It changes the notes going to the synth after it.
 
-**Status (2026-10-29):** planning. Nothing built yet.
+**Status (2026-10-29):** phase 1 done: `SpreadCore` (src/SpreadCore.h) over uw-core's `NoteRemap` and
+`ClapNoteRemap`, with tests. Next: the raw CLAP plugin (phase 2).
 
 ## Decisions so far
 
@@ -147,8 +148,9 @@ Laid out top to bottom (2026-10-29):
   NoteGran.
 - **Retune's core, shared through uw-core** (decided 2026-10-29): the latch table, out-of-range drop,
   retrigger and `ClapNotes` are the same here; only "how far does this key move" differs (a shift in
-  Retune, a table lookup here). They move into uw-core first, with their own tests, and Retune moves
-  its pin to use them (uw-core's README, "Pushing: uw-core first"). Then EDOSpread12 uses them.
+  Retune, a table lookup here). Done 2026-10-29: uw-core's `NoteRemap` (uw::ump) and `ClapNoteRemap`
+  (uw::clap-notes) take a shift per key, and NoteRemap does the MIDI 1.0 promotion (off for Retune).
+  Retune uses them since b63211d. EDOSpread12's own code is the mapping alone (`SpreadCore`).
   NoteGran's own copies (its OwnedNotes and CLAP output) could follow later; not part of this plan.
 - **clap-wrapper** and the VST3 SDK as submodules, as Retune's M4: `EDOSPREAD12_BUILD_VST3`,
   `EDOSPREAD12_BUILD_AUV2`, `install-clap`, `install-vst3`, `install-auv2`.

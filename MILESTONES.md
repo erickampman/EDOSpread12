@@ -13,17 +13,18 @@
 - [x] Fill: Floor | Nearest; Even spread dropped, as it is 12-EDO spacing (2026-10-29)
 - [x] Open questions settled: steps 0 … N, refill in the editor only, table from the origin, shared code through uw-core (2026-10-29)
 - [ ] AU subtype code (`ESpr` proposed)
-- [ ] Private repo erickampman/EDOSpread12
+- [x] Private repo erickampman/EDOSpread12
 
 ## M1: Core library
-- [ ] uw-core: Retune's latch table, out-of-range drop, retrigger and `ClapNotes`, with their own tests; pushed first
-- [ ] Retune moves its pin and uses them, its tests still passing
-- [ ] CMake skeleton, external/clap and external/uw-core (UMP-only) submodules, ctest
-- [ ] Mapping: origin, octave, table lookup, steps 0 … N, Pitch 7.9 out; incoming pitch offset kept
-- [ ] Fills: Floor, Nearest (ties up)
-- [ ] Latch table, retrigger, two keys on one output key, out-of-range drop, pass-through, All Notes Off / reset
-- [ ] MIDI 1.0 (kept on a 12-TET key, else promoted to MIDI 2.0, per-note messages following), MIDI 2.0 (attribute type 3) and CLAP note (key + tuning expression) paths
-- [ ] Table-driven tests: N = 1, 5, 12, 19, 31, 96; each fill and origin; out-of-order and shared steps; held-note table change; all three dialects
+- [x] uw-core: Retune's latch, out-of-range drop, retrigger and CLAP note dialect, now a shift per key, with MIDI 1.0 promotion: `NoteRemap` (uw::ump) and `ClapNoteRemap` (uw::clap-notes), tested there; pushed first (uw-core ab028fb, 2026-10-29)
+- [x] uw-core: two keys on one output key: the second ends the first's note, whose Note Off is dropped (a33f7ce)
+- [x] Retune moved its pin and uses them; its tests and clap-validator unchanged (Retune b63211d, 6b50850)
+- [x] CMake skeleton, external/clap (1.2.10) and external/uw-core (UMP-only, plus uw::clap-notes) submodules, ctest
+- [x] Mapping (`SpreadCore`): origin, octave, table lookup, steps 0 … N, Pitch 7.9 out; incoming pitch offset kept
+- [x] Fills: Floor, Nearest (ties up)
+- [x] Latch, retrigger, two keys on one output key, out-of-range drop, pass-through, All Notes Off / reset (uw-core's)
+- [x] MIDI 1.0 (kept on a 12-TET key, else promoted to MIDI 2.0, per-note messages following), MIDI 2.0 (attribute type 3) and CLAP note (key + tuning expression) paths
+- [x] Table-driven tests: N = 1, 5, 12, 19, 24, 31, 96; each fill and origin; out-of-order and shared steps; held-note table change; all three dialects (2026-10-29)
 
 ## M2: Raw CLAP plugin
 - [ ] clap_entry, note-effect feature, note ports in + out (MIDI | MIDI2 | CLAP, prefer MIDI2)
