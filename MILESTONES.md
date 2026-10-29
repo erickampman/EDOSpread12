@@ -35,8 +35,9 @@
 - [x] Default state passes every note unchanged (a MIDI 2.0 note gains a Pitch 7.9 attribute equal to its key: the same pitch)
 
 ## M3: Heard
-- [ ] StageHand: KeyboardEDO (12-EDO piano) → EDOSpread12 → StruckSynth, in 19-EDO and 31-EDO
-- [ ] Bitwig, with a synth that honours tuning expressions
+- [x] Heard in StageHand (2026-10-29)
+- [ ] StageHand in 19-EDO and 31-EDO specifically: KeyboardEDO (12-EDO piano) → EDOSpread12 → StruckSynth
+- [x] Heard in Bitwig (2026-10-29)
 - [ ] An EDO below 12 (5-EDO): shared steps play without stuck notes
 
 ## M4: Editor
