@@ -65,6 +65,10 @@ public:
         return remap_.process(in, out);
     }
 
+    // On by default. Off where MIDI 2.0 can't leave the plugin (clap-wrapper, or a host that
+    // takes no MIDI 2.0): a MIDI 1.0 note is then rounded to the nearest key, as in Retune.
+    void setPromoteMidi1(bool on) noexcept { remap_.setPromoteMidi1(on); }
+
     // Forget every sounding note (host reset).
     void reset() noexcept { remap_.reset(); }
 

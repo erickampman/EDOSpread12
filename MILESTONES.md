@@ -2,8 +2,8 @@
 
 ## Tests
 - all: cmake -S . -B build -G Ninja && ninja -C build && ctest --test-dir build --output-on-failure
-- validator: clap-validator validate build/EDOSpread12.clap
-- install: ninja -C build install-clap install-vst3 install-auv2 (CLAP and VST3 symlinked, the AU copied)
+- validator: clap-validator validate build/EDOSpread12.clap (35 pass, 9 skipped: no presets or audio ports)
+- install: ninja -C build install-clap (symlinked); install-vst3 and install-auv2 come with M5
 - au: auval -v aumi ESpr nLKL
 - vst3: Steinberg's validator (built from external/vst3sdk) on build/EDOSpread12.vst3
 
@@ -27,10 +27,12 @@
 - [x] Table-driven tests: N = 1, 5, 12, 19, 24, 31, 96; each fill and origin; out-of-order and shared steps; held-note table change; all three dialects (2026-10-29)
 
 ## M2: Raw CLAP plugin
-- [ ] clap_entry, note-effect feature, note ports in + out (MIDI | MIDI2 | CLAP, prefer MIDI2)
-- [ ] 15 parameters (EDO, Origin, Fill, Step 1–12, names following the origin), state `EDOSpread12 1`, clap-validator clean
-- [ ] Headless host test: MIDI 1.0, MIDI 2.0 and CLAP notes in, output events checked
-- [ ] Default state passes every note unchanged
+- [x] clap_entry, note-effect feature, note ports in + out (MIDI | MIDI2 | CLAP, prefer MIDI2; MIDI under clap-wrapper)
+- [x] 15 parameters (EDO, Origin, Fill, a step per key named for it from the origin: "Step A" …), state `EDOSpread12 1`, clap-validator clean (2026-10-29)
+- [x] Origin renames the steps: request_callback, then `CLAP_PARAM_RESCAN_INFO` on the main thread
+- [x] MIDI 1.0 promoted to MIDI 2.0 only where the host takes MIDI2 and not under clap-wrapper; rounded otherwise
+- [x] Headless host test (test/ClapTests.cpp): MIDI 1.0, MIDI 2.0 and CLAP notes in, output events checked; params, names, state
+- [x] Default state passes every note unchanged (a MIDI 2.0 note gains a Pitch 7.9 attribute equal to its key: the same pitch)
 
 ## M3: Heard
 - [ ] StageHand: KeyboardEDO (12-EDO piano) → EDOSpread12 → StruckSynth, in 19-EDO and 31-EDO

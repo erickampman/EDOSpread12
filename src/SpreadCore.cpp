@@ -11,6 +11,15 @@ int floorDiv(int num, int den) noexcept {
     return num >= 0 ? num / den : -((-num + den - 1) / den);
 }
 
+// pitch79() for params already clamped.
+int pitch79Clamped(const Params& c, int key) noexcept {
+    const int    octave = floorDiv(key - c.origin, kKeys);
+    const int    d      = key - c.origin - kKeys * octave;   // 0 … 11
+    const int    step   = c.steps[static_cast<std::size_t>(d)];
+    // 512 × 12 × step / N, rounded to nearest (never negative).
+    return (c.origin + kKeys * octave) * 512 + (2 * 512 * kKeys * step + c.edo) / (2 * c.edo);
+}
+
 } // namespace
 
 Table filled(Fill fill, int edo) noexcept {
@@ -31,17 +40,11 @@ Params clamped(const Params& p) noexcept {
     return c;
 }
 
-int pitch79(const Params& p, int key) noexcept {
-    const Params c      = clamped(p);
-    const int    octave = floorDiv(key - c.origin, kKeys);
-    const int    d      = key - c.origin - kKeys * octave;   // 0 … 11
-    const int    step   = c.steps[static_cast<std::size_t>(d)];
-    // 512 × 12 × step / N, rounded to nearest (never negative).
-    return (c.origin + kKeys * octave) * 512 + (2 * 512 * kKeys * step + c.edo) / (2 * c.edo);
-}
+int pitch79(const Params& p, int key) noexcept { return pitch79Clamped(clamped(p), key); }
 
 void shifts(const Params& p, int (&shift79)[128]) noexcept {
-    for (int key = 0; key < 128; ++key) shift79[key] = pitch79(p, key) - key * 512;
+    const Params c = clamped(p);
+    for (int key = 0; key < 128; ++key) shift79[key] = pitch79Clamped(c, key) - key * 512;
 }
 
 SpreadCore::SpreadCore() noexcept {

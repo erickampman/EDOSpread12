@@ -8,8 +8,9 @@ over a pure C++ core, and the vendored free-audio **clap-wrapper** for the other
 
 EDOSpread12 makes no sound of its own. It changes the notes going to the synth after it.
 
-**Status (2026-10-29):** phase 1 done: `SpreadCore` (src/SpreadCore.h) over uw-core's `NoteRemap` and
-`ClapNoteRemap`, with tests. Next: the raw CLAP plugin (phase 2).
+**Status (2026-10-29):** phases 1 and 2 done: `SpreadCore` (src/SpreadCore.h) over uw-core's
+`NoteRemap` and `ClapNoteRemap`, and the raw CLAP plugin (src/plugin.cpp: clap-validator clean,
+headless host test). Next: hearing it in StageHand and Bitwig (phase 3).
 
 ## Decisions so far
 
@@ -71,11 +72,13 @@ rule.
   - 1 `Origin`: pitch class C … B, default A.
   - 2 `Fill`: Floor | Nearest, default Nearest.
   - 3 … 14 `Step 1` … `Step 12`: the table, from the origin up. Integer; CLAP ranges are fixed, so the
-    host sees 0 … 96 and EDOSpread12 uses `clamp(step, 0, N)`. Display names follow the origin
-    (with A origin, `Step 1` shows as "A", `Step 4` as "C"). Indexed from the origin, not from C, so
+    host sees 0 … 96 and EDOSpread12 uses `clamp(step, 0, N)`. Names follow the origin (with A
+    origin, `Step 1` is "Step A", `Step 4` "Step C"); changing Origin asks the host to rescan the
+    parameter info (`CLAP_PARAM_RESCAN_INFO`, allowed while active). Indexed from the origin, not from C, so
     changing Origin moves the whole pattern, not each key's step (decided 2026-10-29).
   - Default state: 12-EDO, A origin, Nearest, so every key plays its own pitch: EDOSpread12 does
-    nothing until you change it.
+    nothing until you change it. (A MIDI 2.0 note does come out with a Pitch 7.9 attribute equal to its
+    own key: uw-core's `transposeNote79` always writes one, as in Retune at Steps 0. Same pitch.)
 - **Output dialect follows the input**, as Retune, with Chords' one exception for MIDI 1.0 (`ClapNotes`,
   the latch table and the 7.9 maths are Retune's, reused, see Code):
   - **MIDI 2.0:** Note On with attribute type 3, Pitch 7.9. The note number is the integer part, so a
@@ -86,6 +89,10 @@ rule.
     go to the latched key and note id, as Retune's M3. This is the path that keeps the spread in
     Bitwig, which sends plugins CLAP notes and no MIDI 2.0.
   - **MIDI 1.0:** a note that lands on a 12-TET key (always, in 12-EDO) stays MIDI 1.0. A note with a
+    fraction is promoted (below) only where MIDI 2.0 can leave the plugin: the host's note dialects
+    include MIDI2, and it isn't clap-wrapper (as built, 2026-10-29). Elsewhere it's rounded to the
+    nearest key, as Retune; a host like Bitwig, which takes no MIDI 2.0, sends CLAP notes anyway.
+    Promotion: a note with a
     fraction goes out as **MIDI 2.0** with Pitch 7.9 (decided 2026-10-29, as NoteGran Chords' question
     10): MIDI 1.0 can't carry it, and rounding would undo the spread. Its Note Off, poly pressure and
     other per-note messages follow it in MIDI 2.0, from the latch. Where this pays: hosts that pass

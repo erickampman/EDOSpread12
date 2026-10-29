@@ -31,10 +31,60 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
     target_compile_options(edospread12_core PRIVATE -Wall -Wextra -Wconversion)
 endif()
 
+# --- the .clap ---------------------------------------------------------------------------------
+# Hidden visibility, so clap_entry (CLAP_EXPORT in plugin.cpp) is the only exported symbol and two
+# plugins with different uw-core pins can't bind to each other's copies.
+function(edospread12_add_plugin_sources TARGET_NAME)
+    target_sources(${TARGET_NAME} PRIVATE src/plugin.cpp)
+    target_include_directories(${TARGET_NAME} PRIVATE external/clap/include)
+    target_link_libraries(${TARGET_NAME} PRIVATE edospread12_core uw::clap-notes)
+    target_compile_definitions(${TARGET_NAME} PRIVATE EDOSPREAD12_VERSION_STRING="${PROJECT_VERSION}")
+    set_target_properties(${TARGET_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
+    if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
+        set_source_files_properties(src/plugin.cpp TARGET_DIRECTORY ${TARGET_NAME}
+            PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra")
+    endif()
+endfunction()
+
+add_library(EDOSpread12 MODULE)
+edospread12_add_plugin_sources(EDOSpread12)
+
+if(APPLE)
+    set_target_properties(EDOSpread12 PROPERTIES
+        BUNDLE TRUE
+        BUNDLE_EXTENSION "clap"
+        MACOSX_BUNDLE_GUI_IDENTIFIER "com.unlikelyware.edospread12"
+        MACOSX_BUNDLE_BUNDLE_NAME "EDOSpread12"
+        MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
+        MACOSX_BUNDLE_SHORT_VERSION_STRING "${PROJECT_VERSION}")
+    set(EDOSPREAD12_CLAP_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/CLAP")
+    set(EDOSPREAD12_CLAP_ARTIFACT "$<TARGET_BUNDLE_DIR:EDOSpread12>")
+else()
+    set_target_properties(EDOSpread12 PROPERTIES PREFIX "" SUFFIX ".clap")
+    set(EDOSPREAD12_CLAP_DIR "$ENV{HOME}/.clap")
+    set(EDOSPREAD12_CLAP_ARTIFACT "$<TARGET_FILE:EDOSpread12>")
+endif()
+
+# A separate target, as in the synths, so an ordinary build never writes outside the build tree.
+add_custom_target(install-clap
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${EDOSPREAD12_CLAP_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E rm -rf "${EDOSPREAD12_CLAP_DIR}/EDOSpread12.clap"
+    COMMAND ${CMAKE_COMMAND} -E create_symlink "${EDOSPREAD12_CLAP_ARTIFACT}" "${EDOSPREAD12_CLAP_DIR}/EDOSpread12.clap"
+    DEPENDS EDOSpread12
+    VERBATIM
+    COMMENT "Symlinking EDOSpread12.clap into ${EDOSPREAD12_CLAP_DIR}")
+
 # --- tests -------------------------------------------------------------------------------------
 include(CTest)
 if(BUILD_TESTING)
     add_executable(edospread12-core-tests test/SpreadCoreTests.cpp)
     target_link_libraries(edospread12-core-tests PRIVATE edospread12_core uw::clap-notes)
     add_test(NAME edospread12-core COMMAND edospread12-core-tests)
+
+    # Drives the built .clap over the CLAP C API: no DAW, no GUI.
+    add_executable(edospread12-clap-tests test/ClapTests.cpp)
+    target_include_directories(edospread12-clap-tests PRIVATE external/clap/include)
+    target_link_libraries(edospread12-clap-tests PRIVATE uw::ump ${CMAKE_DL_LIBS})
+    add_dependencies(edospread12-clap-tests EDOSpread12)
+    add_test(NAME edospread12-clap COMMAND edospread12-clap-tests "${EDOSPREAD12_CLAP_ARTIFACT}")
 endif()
