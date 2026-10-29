@@ -11,8 +11,8 @@ EDOSpread12 makes no sound of its own. It changes the notes going to the synth a
 **Status (2026-10-29):** phases 1 and 2 done: `SpreadCore` (src/SpreadCore.h) over uw-core's
 `NoteRemap` and `ClapNoteRemap`, and the raw CLAP plugin (src/plugin.cpp: clap-validator clean,
 headless host test). Heard working in StageHand and Bitwig (2026-10-29). Phase 4, the editor
-(src/UI), is built and tried in its preview (tools/preview_editor.mm); not yet seen with notes
-playing in a host.
+(src/UI), is built and seen working in a host (2026-10-29). Phase 5 (other formats) is set aside:
+CLAP only. Phase 6, the docs, is done; the Linux build is still to check.
 
 ## Decisions so far
 

@@ -58,9 +58,10 @@
 - AUv2 deferred: it would load in Logic's MIDI FX slot but play semitones only (see Later: MPE output).
 
 ## M6: Docs
-- [ ] README.md, in Retune's shape: what it does, formats, installing
-- [ ] BUILDING.md in the shared layout
-- [ ] THIRD_PARTY_NOTICES.md: every bundled component, with its license text
+- [x] README.md, in Retune's shape: what it does, how it maps, the editor, parameters, hosts, installing (2026-10-29)
+- [x] BUILDING.md in the shared layout, with tools/fetch_deps.sh; a fresh clone builds and passes its tests by it (macOS)
+- [x] THIRD_PARTY_NOTICES.md: every bundled component, with its license text (ReleaseUMP's generator, EDOSpread12 added)
+- [ ] The Linux build checked (the same steps; nothing Linux-specific is untested in the code, but it hasn't been built there)
 
 ## Later
 - [ ] Map files: save and load tables; Scala `.kbm` import and export
