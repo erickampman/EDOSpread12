@@ -17,6 +17,9 @@
 //
 // The step parameters are named for their keys, which the origin decides ("Step A", "Step A#" …
 // with an A origin). Changing Origin asks the host to rescan the parameter info.
+//
+// The editor (src/UI/EDOSpread12UI.cpp, DPF + NanoVG) meets this file only at plugin_gui.h: its
+// edits arrive through a ring and are applied, and told to the host, at the next process or flush.
 
 #include <clap/clap.h>
 #include <strings.h>   // strcasecmp
@@ -30,6 +33,7 @@
 #include <string>
 
 #include "SpreadCore.h"
+#include "plugin_gui.h"
 #include "uw/clap/ClapNoteRemap.h"
 #include "uw/ump/Ump.h"
 
@@ -83,6 +87,42 @@ double clampParam(uint32_t index, double value) {
 }
 
 // ---------------------------------------------------------------------------------------------
+// Editor edits (main thread) → the audio thread, as NoteGran's: process() and flush() are never
+// concurrent, so one consumer.
+// ---------------------------------------------------------------------------------------------
+
+struct GuiEdit {
+    enum Kind : uint8_t { Begin, Value, End } kind;
+    uint32_t index;
+    double   value;
+};
+
+class GuiEditRing {
+public:
+    bool push(const GuiEdit& edit) {
+        const uint32_t t    = tail.load(std::memory_order_relaxed);
+        const uint32_t next = (t + 1) & (kCapacity - 1);
+        if (next == head.load(std::memory_order_acquire)) return false;   // full: dropped, never blocks
+        buffer[t] = edit;
+        tail.store(next, std::memory_order_release);
+        return true;
+    }
+    bool pop(GuiEdit& out) {
+        const uint32_t h = head.load(std::memory_order_relaxed);
+        if (h == tail.load(std::memory_order_acquire)) return false;
+        out = buffer[h];
+        head.store((h + 1) & (kCapacity - 1), std::memory_order_release);
+        return true;
+    }
+
+private:
+    static constexpr uint32_t kCapacity = 512;   // a power of two; a refill is 12 values and 24 gestures
+    GuiEdit                   buffer[kCapacity]{};
+    std::atomic<uint32_t>     head{0};
+    std::atomic<uint32_t>     tail{0};
+};
+
+// ---------------------------------------------------------------------------------------------
 // The plugin
 // ---------------------------------------------------------------------------------------------
 
@@ -99,6 +139,12 @@ struct Plugin {
     uw::ClapNoteRemap clapNotes;   // CLAP note events; likewise
     std::string       scratch;
     bool              wrapped = false;   // hosted by clap-wrapper (AUv2, VST3)
+
+    void*       gui = nullptr;   // the editor's state (EDOSpread12UI.cpp); main thread
+    GuiEditRing guiEdits;
+    // Input keys held, on any channel: counted on the audio thread, published as bits for the editor.
+    uint8_t               heldCount[128] = {};
+    std::atomic<uint64_t> heldBits[2]{};
 };
 
 Plugin* self(const clap_plugin_t* plugin) { return static_cast<Plugin*>(plugin->plugin_data); }
@@ -122,15 +168,85 @@ void applyParams(Plugin* p) {
     p->clapNotes.setShifts(shifts);
 }
 
-void applyParamEvent(Plugin* p, const clap_event_param_value_t* ev) {
-    if (ev->param_id >= kParamCount) return;
-    const double v = clampParam(ev->param_id, ev->value);
-    if (ev->param_id == kOrigin && v != p->values[kOrigin].load(std::memory_order_relaxed)) {
+// Stores a value; a new origin renames the steps, so the host is asked to rescan their info.
+void storeValue(Plugin* p, uint32_t id, double value) {
+    const double v = clampParam(id, value);
+    if (id == kOrigin && v != p->values[kOrigin].load(std::memory_order_relaxed)) {
         p->namesChanged.store(true, std::memory_order_release);
         p->host->request_callback(p->host);
     }
-    p->values[ev->param_id].store(v, std::memory_order_relaxed);
+    p->values[id].store(v, std::memory_order_relaxed);
+}
+
+void applyParamEvent(Plugin* p, const clap_event_param_value_t* ev) {
+    if (ev->param_id >= kParamCount) return;
+    storeValue(p, ev->param_id, ev->value);
     applyParams(p);
+}
+
+// The editor's edits, applied and told to the host (as param and gesture events at time 0, before
+// anything else this block sends). True if any value changed.
+bool applyGuiEdits(Plugin* p, const clap_output_events_t* out) {
+    bool    changed = false;
+    GuiEdit edit;
+    while (p->guiEdits.pop(edit)) {
+        if (edit.index >= kParamCount) continue;
+        if (edit.kind == GuiEdit::Value) {
+            storeValue(p, edit.index, edit.value);
+            changed = true;
+        }
+        if (out == nullptr) continue;
+        if (edit.kind == GuiEdit::Value) {
+            clap_event_param_value_t ev{};
+            ev.header     = {sizeof(ev), 0, CLAP_CORE_EVENT_SPACE_ID, CLAP_EVENT_PARAM_VALUE, 0};
+            ev.param_id   = edit.index;
+            ev.note_id    = -1;
+            ev.port_index = -1;
+            ev.channel    = -1;
+            ev.key        = -1;
+            ev.value      = p->values[edit.index].load(std::memory_order_relaxed);
+            out->try_push(out, &ev.header);
+        } else {
+            clap_event_param_gesture_t ev{};
+            ev.header   = {sizeof(ev), 0, CLAP_CORE_EVENT_SPACE_ID,
+                           uint16_t(edit.kind == GuiEdit::Begin ? CLAP_EVENT_PARAM_GESTURE_BEGIN
+                                                                : CLAP_EVENT_PARAM_GESTURE_END),
+                           0};
+            ev.param_id = edit.index;
+            out->try_push(out, &ev.header);
+        }
+    }
+    return changed;
+}
+
+// --- held keys, for the editor ---
+
+void hold(Plugin* p, int key, bool on) {
+    if (key < 0 || key > 127) return;
+    uint8_t& n = p->heldCount[key];
+    if (on && n < 255) ++n;
+    else if (!on && n > 0) --n;
+}
+
+void releaseAll(Plugin* p) { std::memset(p->heldCount, 0, sizeof(p->heldCount)); }
+
+void publishHeld(Plugin* p) {
+    uint64_t words[2] = {0, 0};
+    for (int k = 0; k < 128; ++k)
+        if (p->heldCount[k] != 0) words[k / 64] |= uint64_t(1) << (k % 64);
+    p->heldBits[0].store(words[0], std::memory_order_relaxed);
+    p->heldBits[1].store(words[1], std::memory_order_relaxed);
+}
+
+// A UMP note on or off (MIDI 1.0 or 2.0), or All Sound / Notes Off.
+void trackHeld(Plugin* p, const uw::MidiMessage& m) {
+    if (!ump::isChannelVoice(m)) return;
+    if (ump::isNoteOn(m)) hold(p, ump::noteNumber(m), true);
+    else if (ump::isNoteOff(m)) hold(p, ump::noteNumber(m), false);
+    else if (ump::status(m) == ump::Status::ControlChange) {
+        const auto index = (m.words[0] >> 8) & 0x7F;
+        if (index == 120 || index == 123) releaseAll(p);
+    }
 }
 
 // "Step A", with an A origin, for the first step parameter.
@@ -182,6 +298,7 @@ void handleEvent(Plugin* p, const clap_event_header_t* h, const clap_output_even
             uw::MidiMessage m;
             std::memcpy(m.words, ev->data, sizeof(m.words));
             m.wordCount = ump::wordCountForType(uint8_t(m.words[0] >> 28));
+            trackHeld(p, m);
             spreadAndPush(p, h, ev->port_index, m, out);
             break;
         }
@@ -194,6 +311,7 @@ void handleEvent(Plugin* p, const clap_event_header_t* h, const clap_output_even
                 m.words[0]  = 0x2000'0000u | (uint32_t(ev->data[0]) << 16) |
                               (uint32_t(ev->data[1] & 0x7F) << 8) | uint32_t(ev->data[2] & 0x7F);
                 m.wordCount = 1;
+                trackHeld(p, m);
                 spreadAndPush(p, h, ev->port_index, m, out);
             } else {
                 push(out, h);   // system messages pass through as they are
@@ -203,7 +321,16 @@ void handleEvent(Plugin* p, const clap_event_header_t* h, const clap_output_even
 
         case CLAP_EVENT_NOTE_ON:
         case CLAP_EVENT_NOTE_OFF:
-        case CLAP_EVENT_NOTE_CHOKE:
+        case CLAP_EVENT_NOTE_CHOKE: {
+            const auto* ev = reinterpret_cast<const clap_event_note_t*>(h);
+            if (ev->key < 0) {
+                if (h->type != CLAP_EVENT_NOTE_ON) releaseAll(p);   // a wildcard end
+            } else {
+                hold(p, ev->key, h->type == CLAP_EVENT_NOTE_ON);
+            }
+            p->clapNotes.process(h, out);
+            break;
+        }
         case CLAP_EVENT_NOTE_EXPRESSION:
             p->clapNotes.process(h, out);
             break;
@@ -239,6 +366,8 @@ bool plug_activate(const clap_plugin_t* plugin, double, uint32_t, uint32_t) {
     Plugin* p = self(plugin);
     p->core.reset();
     p->clapNotes.reset();
+    releaseAll(p);
+    publishHeld(p);
     applyParams(p);
     p->valuesChangedByState.store(false, std::memory_order_relaxed);
     return true;
@@ -251,17 +380,21 @@ void plug_stop_processing(const clap_plugin_t*) {}
 void plug_reset(const clap_plugin_t* plugin) {
     self(plugin)->core.reset();
     self(plugin)->clapNotes.reset();
+    releaseAll(self(plugin));
+    publishHeld(self(plugin));
 }
 
 clap_process_status plug_process(const clap_plugin_t* plugin, const clap_process_t* process) {
     Plugin* p = self(plugin);
-    if (p->valuesChangedByState.exchange(false, std::memory_order_acquire))
+    const bool fromGui = applyGuiEdits(p, process->out_events);
+    if (p->valuesChangedByState.exchange(false, std::memory_order_acquire) || fromGui)
         applyParams(p);
 
     const clap_input_events_t* in = process->in_events;
     const uint32_t count = in != nullptr ? in->size(in) : 0;
     for (uint32_t i = 0; i < count; ++i)
         handleEvent(p, in->get(in, i), process->out_events);
+    publishHeld(p);
     return CLAP_PROCESS_CONTINUE;
 }
 
@@ -359,9 +492,10 @@ bool params_text_to_value(const clap_plugin_t*, clap_id id, const char* text, do
 }
 
 void params_flush(const clap_plugin_t* plugin, const clap_input_events_t* in,
-                  const clap_output_events_t*) {
+                  const clap_output_events_t* out) {
     // Never concurrent with process, so the core can be updated here too.
     Plugin* p = self(plugin);
+    if (applyGuiEdits(p, out)) applyParams(p);
     const uint32_t count = in != nullptr ? in->size(in) : 0;
     for (uint32_t i = 0; i < count; ++i) {
         const clap_event_header_t* h = in->get(in, i);
@@ -431,7 +565,13 @@ bool state_load(const clap_plugin_t* plugin, const clap_istream_t* stream) {
 
 const clap_plugin_state_t kStateExt = {state_save, state_load};
 
+void plug_on_timer(const clap_plugin_t* plugin, clap_id timerId) { es_gui_on_timer(plugin, timerId); }
+
+const clap_plugin_timer_support_t kTimerExt = {plug_on_timer};
+
 const void* plug_get_extension(const clap_plugin_t*, const char* id) {
+    if (std::strcmp(id, CLAP_EXT_GUI) == 0) return es_gui_extension();
+    if (std::strcmp(id, CLAP_EXT_TIMER_SUPPORT) == 0) return &kTimerExt;
     if (std::strcmp(id, CLAP_EXT_AUDIO_PORTS) == 0) return &kAudioPorts;
     if (std::strcmp(id, CLAP_EXT_NOTE_PORTS) == 0) return &kNotePorts;
     if (std::strcmp(id, CLAP_EXT_PARAMS) == 0) return &kParamsExt;
@@ -508,6 +648,68 @@ const void* entry_get_factory(const char* factoryId) {
 }
 
 } // namespace
+
+// ---------------------------------------------------------------------------------------------
+// The seam the editor calls (plugin_gui.h)
+// ---------------------------------------------------------------------------------------------
+
+extern "C" {
+
+const clap_host_t* es_plugin_host(const clap_plugin_t* plugin) { return self(plugin)->host; }
+
+void  es_plugin_set_gui(const clap_plugin_t* plugin, void* gui) { self(plugin)->gui = gui; }
+void* es_plugin_get_gui(const clap_plugin_t* plugin) { return self(plugin)->gui; }
+
+uint32_t es_param_count(const clap_plugin_t*) { return kParamCount; }
+
+bool es_param_info(const clap_plugin_t* plugin, uint32_t index, es_param_info_t* info) {
+    if (index >= kParamCount) return false;
+    static thread_local char names[kParamCount][CLAP_NAME_SIZE];   // the main thread's, for a step
+    clap_param_info_t clap{};
+    params_get_info(plugin, index, &clap);
+    std::snprintf(names[index], sizeof(names[index]), "%s", clap.name);
+    info->name   = names[index];
+    info->min    = kParams[index].min;
+    info->max    = kParams[index].max;
+    info->def    = kParams[index].def;
+    info->labels = index == kOrigin ? kNoteNames : index == kFill ? kFillNames : nullptr;
+    return true;
+}
+
+double es_param_value(const clap_plugin_t* plugin, uint32_t index) {
+    return index < kParamCount ? self(plugin)->values[index].load(std::memory_order_relaxed) : 0.0;
+}
+
+void es_param_text(const clap_plugin_t* plugin, uint32_t index, double v, char* out, uint32_t size) {
+    if (size == 0) return;
+    out[0] = 0;
+    params_value_to_text(plugin, index, v, out, size);
+}
+
+void es_param_begin_gesture(const clap_plugin_t* plugin, uint32_t index) {
+    self(plugin)->guiEdits.push({GuiEdit::Begin, index, 0.0});
+}
+
+void es_param_set_from_gui(const clap_plugin_t* plugin, uint32_t index, double v) {
+    Plugin* p = self(plugin);
+    if (index >= kParamCount) return;
+    // Stored at once, so the editor's next read shows it; applied at the next process() or flush.
+    storeValue(p, index, v);   // a new origin asks for the steps' names to be rescanned
+    p->guiEdits.push({GuiEdit::Value, index, v});
+    const auto* hostParams = static_cast<const clap_host_params_t*>(p->host->get_extension(p->host, CLAP_EXT_PARAMS));
+    if (hostParams != nullptr && hostParams->request_flush != nullptr) hostParams->request_flush(p->host);
+}
+
+void es_param_end_gesture(const clap_plugin_t* plugin, uint32_t index) {
+    self(plugin)->guiEdits.push({GuiEdit::End, index, 0.0});
+}
+
+void es_held_keys(const clap_plugin_t* plugin, uint64_t words[2]) {
+    words[0] = self(plugin)->heldBits[0].load(std::memory_order_relaxed);
+    words[1] = self(plugin)->heldBits[1].load(std::memory_order_relaxed);
+}
+
+} // extern "C"
 
 extern "C" CLAP_EXPORT const clap_plugin_entry_t clap_entry = {
     .clap_version = CLAP_VERSION_INIT,

@@ -5,6 +5,7 @@
 - validator: clap-validator validate build/EDOSpread12.clap (35 pass, 9 skipped: no presets or audio ports)
 - install: ninja -C build install-clap (symlinked); install-vst3 and install-auv2 come with M5
 - au: auval -v aumi ESpr nLKL
+- preview: open -n "build/EDOSpread12 Preview.app" --args "$PWD/build/EDOSpread12.clap" [id=value ...] (the editor alone, macOS)
 - vst3: Steinberg's validator (built from external/vst3sdk) on build/EDOSpread12.vst3
 
 ## M0: Plan
@@ -41,14 +42,16 @@
 - [ ] An EDO below 12 (5-EDO): shared steps play without stuck notes
 
 ## M4: Editor
-- [ ] DPF for drawing only, NoteGran's widget kit, one accent
-- [ ] Step circle of the chosen EDO, step 0 at the top; its ring in 12 arcs, dark for black keys and light for white, breaking where Fill puts them
-- [ ] Piano octave laid out straight below the circle, from the origin; click a key to select it
-- [ ] Curve from the selected key to its indicator on the circle; drag the indicator in whole steps to reassign
-- [ ] Marks for the other keys' steps; out-of-order and shared keys tinted on the piano
-- [ ] EDO, Origin, Fill, Fill button; the selected key's step and cents offset
-- [ ] Refill in the editor as one gesture; automation clamps, doesn't refill
-- [ ] Seen with notes playing in StageHand and Bitwig
+- [x] DPF for drawing only (external/dpf, NoteGran's pin), NoteGran's widget kit, a sea-green accent (2026-10-29)
+- [x] Step circle of the chosen EDO, step 0 at the top; its ring in 12 arcs, dark for black keys and light for white, breaking where Fill puts them
+- [x] Piano octave laid out straight below the circle, from the origin; click a key to select it
+- [x] Curve from the selected key to its indicator on the circle; drag the indicator in whole steps to reassign
+- [x] Marks for the other keys' steps (names stacked on a shared step); out-of-order and shared keys tinted on the piano
+- [x] EDO, Origin, Fill, "Fill all keys"; the selected key's step and cents offset, and what's odd about it
+- [x] Refill in the editor as one gesture (EDO turned, Fill chosen, the button); automation clamps, doesn't refill
+- [x] Held keys lit on the piano and the circle (plugin_gui.h's es_held_keys)
+- [x] Tried in tools/preview_editor.mm ("EDOSpread12 Preview.app"): select, drag, Fill, EDO, Origin (2026-10-29)
+- [ ] Seen with notes playing in StageHand and Bitwig (held keys lit; automation shown)
 
 ## M5: Other formats (clap-wrapper)
 - [ ] clap-wrapper and the VST3 SDK as submodules (`tools/fetch_deps.sh`), `EDOSPREAD12_BUILD_VST3`, `EDOSPREAD12_BUILD_AUV2`

@@ -10,7 +10,9 @@ EDOSpread12 makes no sound of its own. It changes the notes going to the synth a
 
 **Status (2026-10-29):** phases 1 and 2 done: `SpreadCore` (src/SpreadCore.h) over uw-core's
 `NoteRemap` and `ClapNoteRemap`, and the raw CLAP plugin (src/plugin.cpp: clap-validator clean,
-headless host test). Heard working in StageHand and Bitwig (2026-10-29). Next: the editor (phase 4).
+headless host test). Heard working in StageHand and Bitwig (2026-10-29). Phase 4, the editor
+(src/UI), is built and tried in its preview (tools/preview_editor.mm); not yet seen with notes
+playing in a host.
 
 ## Decisions so far
 
@@ -117,8 +119,10 @@ rule.
 
 ## Editor
 
-DPF for drawing only, with NoteGran's widget kit (`src/UI`: Knob, Dropdown, GroupBox, Logo) and one
-accent colour. One window:
+DPF for drawing only, with NoteGran's widget kit (`src/UI`: Knob, Dropdown, GroupBox, PopupMenu, Logo)
+and one accent colour, sea green. One window, 860 × 600 at 1×, scaling from 0.8× and keeping its
+shape. As built (2026-10-29): `src/UI/SpreadView.hpp` is the circle and piano, `EDOSpread12UI.cpp`
+the window and the CLAP gui extension, `src/plugin_gui.h` the seam to the plugin (as NoteGran's).
 
 Laid out top to bottom (2026-10-29):
 
@@ -146,8 +150,13 @@ Laid out top to bottom (2026-10-29):
   visible; keys out of order or sharing a step are tinted on the piano.
 - **Read-out** for the selected key: its step and its offset in cents from the key's 12-TET pitch
   ("C → step 5 of 19, 316¢, +16¢").
-- **Controls:** EDO knob, Origin dropdown, Fill dropdown and a Fill button (refills with the current
-  choice).
+- **Controls:** EDO knob, Origin dropdown, Fill dropdown and a "Fill all keys" button (refills with
+  the current choice, over hand edits).
+- **Held keys** are lit on the piano and their marks on the circle (any octave, any channel).
+- **The arcs are thick strokes**, not filled ring segments: DPF's NanoVG has no stencil buffer, and
+  without one it fills a concave path's whole bounding box.
+- **tools/preview_editor.mm** opens the editor alone in a window ("EDOSpread12 Preview.app", macOS):
+  a minimal CLAP host for looking at and trying it with no DAW.
 
 ## Code
 
