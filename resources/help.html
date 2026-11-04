@@ -1,0 +1,598 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <title>help-EDOSpread12</title>
+    <style>
+:root {
+  --bg: #0f1115;
+  --page: #141823;
+  --text: #e6e2d8;
+  --muted: rgba(230, 226, 216, 0.72);
+  --border: rgba(230, 226, 216, 0.12);
+  --shadow: rgba(0, 0, 0, 0.35);
+
+  /* New: "card" surface (slightly lighter than page) */
+  --card: rgba(255, 255, 255, 0.04);
+  --card-hover: rgba(255, 255, 255, 0.055);
+}
+
+html, body {
+    margin: 0;
+    padding: 0;
+    background-color: #fbfaf7;
+}
+
+/* Page container — new */
+.page {
+    max-width: 900px;       /* or whatever you prefer */
+    margin: 0 auto;         /* center it */
+    padding: 2rem;          /* spacing around content */
+}
+
+/* Basic typography */
+body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+                 Helvetica, Arial, sans-serif;
+    line-height: 1.6;
+    color: #222;
+
+    /* REMOVE padding: now applied by .page */
+    /* padding: 1rem; */
+}
+
+/* Headings */
+h1, h2, h3 {
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+    font-weight: 600;
+}
+
+/* Paragraph spacing */
+p {
+    margin: 0.75rem 0;
+}
+
+/* Lists */
+ul, ol {
+    margin: 0.75rem 0 0.75rem 1.5rem;
+}
+
+/* Code blocks */
+pre, code {
+    font-family: "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+}
+
+pre {
+    background: #f0f0f0;
+    padding: 1rem;
+    overflow-x: auto;
+    border-radius: 6px;
+}
+
+code {
+    background: #ececec;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+}
+
+/* Don't double-style code inside pre blocks */
+pre code {
+    background: none;
+    padding: 0;
+    border-radius: 0;
+}
+
+/* Hook for language-specific styles (future syntax highlighting) */
+code[class^="language-"],
+code[class*=" language-"] {
+    /* placeholder: add colors later if you want */
+}
+
+/* Blockquotes */
+blockquote {
+    margin: 1.5rem 0;
+    padding-left: 1rem;
+    border-left: 3px solid #ccc;
+    color: #555;
+    font-style: italic;
+}
+
+/* Horizontal rule */
+hr {
+    border: none;
+    border-top: 1px solid #ccc;
+    margin: 2rem 0;
+}
+
+.module-container {
+  display: flex; 
+  justify-content: center; 
+}
+
+/* Images */
+img {
+    max-width: 100%;
+    height: auto;
+    display: block;
+    margin: 1rem 0;
+    border-radius: 12px;
+}
+
+.disclosure-content {
+  padding: 0.5em 1em;
+}
+
+.disclosure-content > p:first-child {
+  margin-top: 0;
+}
+
+.disclosure-content > p:last-child {
+  margin-bottom: 0;
+}
+
+:target {
+  scroll-margin-top: 1.5rem;
+  outline: 2px solid rgba(0,0,0,0.15);
+  border-radius: 8px;
+}
+
+figure img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+figure.float-right {
+  float: right;
+  margin: 0 0 1rem 1rem;
+  max-width: 45%;
+}
+
+figure.float-left {
+  float: left;
+  margin: 0 1rem 1rem 0;
+  max-width: 45%;
+}
+
+.clear {
+  clear: both;
+}
+
+figure {
+    display: inline-block;     /* shrink-wrap to image width */
+    margin: 1em 0;
+    text-align: center;        /* center caption under image */
+}
+
+figure img {
+    display: block;            /* prevent inline baseline quirks */
+    max-width: 100%;
+    height: auto;
+}
+
+figcaption {
+    font-size: 0.9em;
+    color: #666;
+    margin-top: 0.4em;
+}
+
+a.embed {
+  display: inline-block;
+  padding: 0.1em 0.4em;
+  border-radius: 4px;
+  background: rgba(0,0,0,0.05);
+  text-decoration: none;
+}
+
+.callout-note {
+  border-color: var(--border);
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1em;
+  margin-top: 10px;
+  margin-bottom: 10px;
+}
+
+/* The generic rounded-rect card */
+.card {
+  display: block;                 /* important for headings */
+  padding: 0.9rem 1rem;
+  margin: 1.1rem 0 0.75rem;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--card);
+  box-shadow: 0 10px 22px var(--shadow);
+}
+
+/* Only hover cards that are meant to be interactive */
+.card.is-interactive:hover {
+  background: var(--card-hover);
+}
+
+
+/* Make sure headings don’t add their own extra margins inside cards */
+.card h1, .card h2, .card h3,
+h1.card, h2.card, h3.card {
+  margin: 0;
+}
+
+.module-header {
+  position: relative;
+  display: flex;
+  justify-content: center;   /* center the title */
+  align-items: baseline;
+}
+
+.module-back {
+  position: absolute;
+  left: 0;
+  font-size: 0.85em;
+  opacity: 0.6;
+  text-decoration: none;
+  letter-spacing: 0.03em;
+}
+
+.module-back:hover {
+  opacity: 1.0;
+}
+
+.module-title {
+  margin: 0;
+  text-align: center;
+}
+
+/* breadcrumb trail */
+.breadcrumb { font-size: 0.85em; opacity: 0.7; letter-spacing: 0.03em; margin-bottom: 0.35rem; }
+.breadcrumb a { text-decoration: none; color: inherit; opacity: 0.75; }
+.breadcrumb a:hover { opacity: 1.0; }
+.breadcrumb .crumb-current { opacity: 1.0; }
+
+
+/* Tables (pipe tables from pandoc) */
+table {
+  border-collapse: collapse;
+  width: 100%;
+  margin: 1rem 0;
+  font-size: 0.95em;
+}
+
+th, td {
+  padding: 0.4rem 0.6rem;
+  border-bottom: 1px solid #ddd;
+  text-align: left;
+  vertical-align: top;
+}
+
+thead th {
+  border-bottom: 2px solid #bbb;
+  font-weight: 600;
+}
+
+tbody tr:nth-child(even) {
+  background: rgba(0, 0, 0, 0.025);
+}    </style>
+</head>
+<body>
+<div class="page">
+<div style="display: flex; align-items: center; gap: 0.75rem; margin: 1.5rem 0 0.5rem;">
+  <a href="https://www.unlikelyware.com" target="_blank" rel="noopener noreferrer">
+    <img src="Unlikelyware.png" alt="Unlikelyware" style="width: 56px; height: auto; border-radius: 10px; margin: 0; display: block;">
+  </a>
+  <h1 style="margin: 0;">EDOSpread12</h1>
+</div>
+
+<p>
+  <em>EDOSpread12 is a CLAP note effect on macOS and Linux. Fine adjustment uses the Control key on both: on the Mac that is Control, not Cmd.</em>
+</p>
+
+<section id="on-this-page" class="callout callout-note card">
+<h2>On This Page</h2>
+<p><a href="#overview">Overview</a> · <a href="#getting-started">Getting
+Started</a> · <a href="#window">The Window</a></p>
+<p><strong>The map —</strong> <a href="#circle">The Circle</a> · <a
+href="#piano">The Piano</a> · <a href="#readout">The Read-out</a></p>
+<p><strong>The controls —</strong> <a href="#edo">EDO</a> · <a
+href="#origin">Origin</a> · <a href="#fill">Fill</a> · <a
+href="#fill-all">Fill All Keys</a></p>
+<p><strong>Playing —</strong> <a href="#hosts">Hosts and Microtones</a>
+· <a href="#midi">Held Notes and MIDI</a> · <a href="#tips">Tips</a> ·
+<a href="#troubleshooting">Troubleshooting</a></p>
+</section>
+<section id="overview" class="callout callout-note card">
+<h2>Overview</h2>
+<p>EDOSpread12 is a <strong>note effect</strong>: it makes no sound. It
+sits in front of a synth and lets an ordinary 12-key keyboard play any
+<strong>equal division of the octave</strong> (EDO), from 1 to 96
+steps.</p>
+<p>Each of the 12 keys of an octave is given <strong>its own
+step</strong> of the EDO, and the pattern repeats every octave. The
+<strong>Origin</strong> key (A by default) is step 0 and plays at its
+usual pitch; the octave counts up from it. With an A origin in 19-EDO,
+the keys A, A#, B … G# are mapped to steps of 19-EDO, and you choose
+which.</p>
+<p>The pitch of a key is its octave's origin plus <strong>12 × step /
+N</strong> semitones. So with an A origin, a key on step 5 of 19 sounds
+316¢ above its octave's A.</p>
+<p><strong>Fill</strong> gives all 12 keys their steps at once:
+<strong>Nearest</strong> puts each key on the step nearest its usual
+pitch, <strong>Floor</strong> on the highest step not above it. Then
+move any key by hand.</p>
+<p>The defaults (12-EDO, A origin, Nearest) leave every note where it
+was: EDOSpread12 does nothing until you change it.</p>
+</section>
+<section id="getting-started" class="callout callout-note card">
+<h2>Getting Started</h2>
+<ol type="1">
+<li><strong>Put EDOSpread12 in front of a synth</strong>: in Bitwig, a
+note FX before the instrument; in REAPER, before the instrument in the
+track's FX chain; in StageHand, the row's <strong>MIDI FX</strong>
+menu.</li>
+<li><strong>Turn EDO</strong> in the Tuning panel, say to 19. All 12
+keys are refilled with the <strong>Fill</strong> choice (Nearest), so
+the keyboard plays the 19-EDO steps nearest the notes you know.</li>
+<li><strong>Play.</strong> Keys you hold light up on the piano and on
+the circle.</li>
+<li><strong>Move a key:</strong> click it on the piano, then drag its
+marker round the circle to the step you want.</li>
+<li><strong>Start again</strong> with <strong>Fill all
+keys</strong>.</li>
+</ol>
+<p>The host saves every setting with its project.</p>
+</section>
+<section id="window" class="callout callout-note card">
+<h2>The Window</h2>
+<p><strong>The header:</strong> the Unlikelyware logo (a click opens
+unlikelyware.com), <strong>EDOSpread12</strong>, and
+<strong>Help</strong> at the right (the <strong>?</strong> box that
+opens this page in your browser).</p>
+<p><strong>Below it:</strong></p>
+<ul>
+<li><strong>The map</strong>, on the left: the <a
+href="#readout">read-out</a> at the top, the <a href="#circle">step
+circle</a>, and a <a href="#piano">piano octave</a> from the
+origin.</li>
+<li><strong>Tuning</strong>, on the right: <a href="#edo">EDO</a>, <a
+href="#origin">Origin</a>, <a href="#fill">Fill</a> and <a
+href="#fill-all">Fill all keys</a>.</li>
+</ul>
+<p><strong>Resizing:</strong> drag the host window's corner. The window
+keeps its shape (860 × 600) and scales everything in it; the smallest
+size is 688 × 480.</p>
+</section>
+<details class="disclosure">
+<summary class="disclosure-title subtle">Knob, menus and the map</summary>
+
+<div class="disclosure-content">
+<table>
+<thead>
+<tr>
+<th>Gesture</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Drag the EDO knob up or down</td>
+<td>Change EDO</td>
+</tr>
+<tr>
+<td>Control-drag</td>
+<td>Ten times finer (Control on the Mac too)</td>
+</tr>
+<tr>
+<td>Scroll over the knob</td>
+<td>Change EDO</td>
+</tr>
+<tr>
+<td>Double-click or Shift-click the knob</td>
+<td>Back to 12</td>
+</tr>
+<tr>
+<td>Click a menu</td>
+<td>Opens its list; click a choice, or click elsewhere to close it</td>
+</tr>
+<tr>
+<td>Click a piano key, or its mark on the circle</td>
+<td>Selects that key</td>
+</tr>
+<tr>
+<td>Drag the selected key's marker</td>
+<td>Moves the key round the circle, a whole step at a time</td>
+</tr>
+<tr>
+<td>Click the ring away from any mark</td>
+<td>Moves the selected key to that step</td>
+</tr>
+</tbody>
+</table>
+<p>Each change is one gesture to the host, so it records as one
+automation move (a refill, of all 12 keys, as one).</p>
+</div>
+</details>
+
+<section id="circle" class="callout callout-note card">
+<h2>The Circle</h2>
+<p>The circle is one octave of the chosen EDO: <strong>N steps</strong>
+round it, step 0 (the origin) at the top, the next origin (step N) back
+at the top again.</p>
+<p><strong>Its ring is a piano octave bent round:</strong> 12 arcs, one
+per key from the origin, <strong>dark for a black key and light for a
+white one</strong>, each named outside the ring. So you can see at a
+glance which familiar key a step is near: in 19-EDO with an A origin,
+step 5 sits in C's light arc, step 2 in A#'s dark one. Where the arcs
+break follows <strong>Fill</strong>:</p>
+<ul>
+<li><strong>Nearest:</strong> each arc is its key's usual pitch ±50¢, so
+a step lies in the arc of the key it's nearest.</li>
+<li><strong>Floor:</strong> each arc runs from its key's usual pitch up
+to the next key's, so a step lies in the arc of the key at or below
+it.</li>
+</ul>
+<p>Changing Fill moves the arcs at once, before you refill, so you can
+see what a refill would do.</p>
+<p><strong>Each key's step is a mark on the circle</strong>, named. The
+<strong>selected key's</strong> mark is the large one, joined by a curve
+to its key on the piano: drag it round to give the key another step. It
+moves in whole steps; dragged past the top from the left, it lands on
+step N, the octave above.</p>
+</section>
+<section id="piano" class="callout callout-note card">
+<h2>The Piano</h2>
+<p>One octave, laid out straight, starting at the origin key.</p>
+<ul>
+<li><strong>Click a key</strong> to select it: a curve joins it to its
+marker on the circle.</li>
+<li><strong>An orange key</strong> is out of order (on a step below the
+key before it, or above the key after it) or shares a step with another
+key. Both are allowed: below 12-EDO some keys must share.</li>
+<li><strong>A lit key</strong> is one you're holding, in any octave and
+on any channel. Its mark on the circle lights too.</li>
+</ul>
+</section>
+<section id="readout" class="callout callout-note card">
+<h2>The Read-out</h2>
+<p>At the top of the map, for the selected key:</p>
+<p><strong>C → step 5 of 19 · 316¢ · +16¢</strong></p>
+<p>The key, its step and the EDO, how far that step is above the origin,
+and how far it is from the key's usual (12-TET) pitch: here, C plays 16¢
+sharp of a normal C.</p>
+</section>
+<section id="edo" class="callout callout-note card">
+<h2>EDO</h2>
+<p><strong>N</strong>, the number of equal steps in an octave: 1 to 96,
+default 12.</p>
+<p><strong>Turning EDO here refills all 12 keys</strong> with the
+current <a href="#fill">Fill</a>, as one gesture with the change: your
+hand edits are replaced. <strong>A host automating EDO doesn't
+refill</strong>: each key's step is limited to the new 0 … N, and comes
+back if N rises again. (Refilling from automation would fight the steps
+you set.)</p>
+</section>
+<section id="origin" class="callout callout-note card">
+<h2>Origin</h2>
+<p>The key that's step 0 and plays at its usual pitch: C … B, default A.
+The octave counts from it, and the piano and the circle start at it.</p>
+<p>The 12 steps are kept <strong>from the origin up</strong>, so
+changing Origin moves the whole pattern, not each key's step: with an E
+origin, E gets what A had. In the host, the step parameters are named
+after their keys from the origin (with an A origin, <em>Step 1</em> is
+"Step A", <em>Step 4</em> "Step C").</p>
+</section>
+<section id="fill" class="callout callout-note card">
+<h2>Fill</h2>
+<p>How a refill gives the 12 keys their steps:</p>
+<ul>
+<li><strong>Nearest</strong> (default): each key on the step nearest its
+usual pitch. Closest to the familiar sound; it may put the last key on
+step N, the octave above. A tie goes up.</li>
+<li><strong>Floor:</strong> each key on the highest step at or below its
+usual pitch. Never sharp.</li>
+</ul>
+<p><strong>Choosing a Fill here refills all 12 keys.</strong> Fill also
+decides where the circle's arcs break.</p>
+</section>
+<section id="fill-all" class="callout callout-note card">
+<h2>Fill All Keys</h2>
+<p>Refills all 12 keys with the current Fill, over any hand edits. Use
+it to start again.</p>
+</section>
+<section id="hosts" class="callout callout-note card">
+<h2>Hosts and Microtones</h2>
+<p>What EDOSpread12 receives decides what it can send:</p>
+<table>
+<thead>
+<tr>
+<th>Host</th>
+<th>EDOSpread12 gets</th>
+<th>The synth hears</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>StageHand</td>
+<td>MIDI 2.0</td>
+<td>The exact step (Pitch 7.9)</td>
+</tr>
+<tr>
+<td>Bitwig</td>
+<td>CLAP notes</td>
+<td>The exact step, from a synth that honours tuning expressions</td>
+</tr>
+<tr>
+<td>A host that takes no MIDI 2.0 and sends MIDI 1.0</td>
+<td>MIDI 1.0</td>
+<td>The nearest semitone</td>
+</tr>
+</tbody>
+</table>
+<ul>
+<li><strong>MIDI 2.0:</strong> a note carries its exact pitch as a Pitch
+7.9 attribute; its note number is the whole part, so a receiver that
+ignores the attribute plays the nearest key below.</li>
+<li><strong>MIDI 1.0 in, MIDI 2.0 out:</strong> where the host takes
+MIDI 2.0, a MIDI 1.0 note that lands between semitones goes out as MIDI
+2.0 rather than being rounded. One that lands on a semitone stays MIDI
+1.0.</li>
+<li><strong>CLAP notes:</strong> the nearest key, followed straight away
+by a tuning expression with the rest.</li>
+</ul>
+<p>The Unlikelyware synths play Pitch 7.9, and PlainOldSynth,
+StruckSynth, StruckRoom and StruckGaussian also play CLAP tuning
+expressions.</p>
+</section>
+<section id="midi" class="callout callout-note card">
+<h2>Held Notes and MIDI</h2>
+<ul>
+<li><strong>Changing the map while notes are held</strong> moves only
+the notes you play next. Each sounding note remembers where it went, so
+its Note Off, pressure and per-note messages follow it, and no note gets
+stuck.</li>
+<li><strong>Two keys on one step</strong> are two notes on one key: the
+second one ends the first.</li>
+<li><strong>A note that arrives with its own pitch</strong> (MIDI 2.0's
+Pitch 7.9) keeps its offset from its key.</li>
+<li><strong>Notes moved below 0 or above 127</strong> (MIDI's range) are
+dropped, with everything that belongs to them.</li>
+<li><strong>Everything that isn't a note</strong> passes through
+unchanged: CCs, channel pitch bend, program changes, SysEx, clock.</li>
+</ul>
+</section>
+<section id="tips" class="callout callout-note card">
+<h2>Tips</h2>
+<ul>
+<li><strong>Learn an EDO by ear:</strong> pick it, leave Fill on
+Nearest, and play familiar tunes: the read-out shows how far each key
+has moved.</li>
+<li><strong>Below 12-EDO</strong> keys must share steps; the orange keys
+show which.</li>
+<li><strong>A scale on the white keys:</strong> with a C origin, put the
+seven white keys on the steps of your scale and the black keys on
+whatever is left.</li>
+<li><strong>Automate EDO safely:</strong> automation clamps rather than
+refills, so a sweep down and back up returns to your map.</li>
+</ul>
+</section>
+<section id="troubleshooting" class="callout callout-note card">
+<h2>Troubleshooting</h2>
+<ul>
+<li><strong>It sounds like 12-EDO.</strong> The host sends MIDI 1.0 and
+takes no MIDI 2.0, or the synth ignores Pitch 7.9 and tuning
+expressions. See <a href="#hosts">Hosts and Microtones</a>.</li>
+<li><strong>My hand edits disappeared.</strong> Turning EDO or choosing
+a Fill in the editor refills all 12 keys.</li>
+<li><strong>Changing a key didn't change the note I'm holding.</strong>
+That's the design: only new notes take the new map.</li>
+<li><strong>Two keys play the same note, and one cuts the other
+off.</strong> They share a step. Move one.</li>
+<li><strong>Some notes make no sound.</strong> They were moved outside
+MIDI's 0–127 range.</li>
+<li><strong>A rebuilt EDOSpread12 doesn't show its changes.</strong>
+Quit and restart the host: a running host keeps the plugin it loaded
+first.</li>
+</ul>
+</section>
+</div>
+</body>
+</html>

@@ -2,7 +2,8 @@
 //
 // The header (the Unlikelyware logo and "EDOSpread12"), the map (SpreadView.hpp: the step circle
 // above a piano octave from the origin), and a Tuning group of the house widget kit (Knob,
-// Dropdown, GroupBox, PopupMenu, copied from NoteGran's): EDO, Origin, Fill, and a Fill button.
+// Dropdown, GroupBox, PopupMenu, copied from NoteGran's): EDO, Origin, Fill, and a Fill button. Help,
+// at the header's right, opens the help page (resources/help.md) in the browser.
 //
 // Choosing a Fill, or turning EDO, here refills all 12 keys from the Fill, as one gesture with the
 // change (docs/design.md, "Filling the table"); host automation of EDO doesn't. The Fill button
@@ -25,6 +26,7 @@
 #include <vector>
 
 #include "Dropdown.hpp"
+#include "HelpButton.hpp"
 #include "EmbeddedResources.hpp"   // build-time: the logo's bytes
 #include "GroupBox.hpp"
 #include "Knob.hpp"
@@ -38,6 +40,7 @@ START_NAMESPACE_DISTRHO
 
 using DGL_NAMESPACE::Button;
 using DGL_NAMESPACE::Color;
+using DGL_NAMESPACE::HelpButton;
 using DGL_NAMESPACE::Dropdown;
 using DGL_NAMESPACE::GroupBox;
 using DGL_NAMESPACE::Knob;
@@ -119,6 +122,11 @@ public:
         fFillButton->setAccentColor(kAccent);
         fGroup->addControl(fFillButton.get());
 
+        // help.html shows the logo as "Unlikelyware.png", so it is written out under that name.
+        fHelp = std::make_unique<HelpButton>(this, std::vector<HelpButton::File>{
+            {"EDOSpread12-help.html", EmbeddedResources::helpData, EmbeddedResources::helpDataSize},
+            {"Unlikelyware.png", EmbeddedResources::Unlikelyware_Final_ColorData,
+             EmbeddedResources::Unlikelyware_Final_ColorDataSize}});
         fMenu = std::make_unique<PopupMenu>(this, this);   // last, so it draws on top
 
         refresh(true);
@@ -294,6 +302,10 @@ private:
         fLogo->setAbsolutePos(M, static_cast<int>(11 * s));
         fTitleX = static_cast<float>(M + static_cast<int>(fLogo->getWidth()) + static_cast<int>(12 * s));
         fMenu->setUiScale(s);
+        const int helpW = static_cast<int>(26 * s);   // Help at the header's right
+        fHelp->setUiScale(s);
+        fHelp->setAbsolutePos(W - M - helpW, static_cast<int>(9 * s));
+        fHelp->setSize(static_cast<uint>(helpW), static_cast<uint>(26 * s));
 
         const int sideW = static_cast<int>(210 * s);
         const int viewW = W - 2 * M - gap - sideW, bodyH = H - hdr - M;
@@ -321,6 +333,7 @@ private:
     std::unique_ptr<Knob>       fEdoKnob;
     std::unique_ptr<Dropdown>   fOriginMenu, fFillMenu;
     std::unique_ptr<Button>     fFillButton;
+    std::unique_ptr<HelpButton> fHelp;
     std::unique_ptr<PopupMenu>  fMenu;
     bool                        fEdoDragging       = false;
     bool                        fHasFont           = false;

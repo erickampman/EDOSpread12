@@ -33,7 +33,8 @@ A step circle of the chosen EDO, its ring shaded like a piano octave bent round 
 black keys, light for the white), so you can see which familiar key each step is near. Below it, the
 octave's 12 keys, laid out straight. Click a key and a curve joins it to its marker on the circle;
 drag the marker round to give the key another step. Keys out of order or sharing a step are marked,
-and the keys you're playing light up.
+and the keys you're playing light up. The **?** at the top right opens the full help page
+([resources/help.md](resources/help.md)) in your browser.
 
 ## Parameters
 

@@ -62,6 +62,7 @@
 - [x] BUILDING.md in the shared layout, with tools/fetch_deps.sh; a fresh clone builds and passes its tests by it (macOS)
 - [x] THIRD_PARTY_NOTICES.md: every bundled component, with its license text (ReleaseUMP's generator, EDOSpread12 added)
 - [ ] The Linux build checked (the same steps; nothing Linux-specific is untested in the code, but it hasn't been built there)
+- [x] Help page (resources/help.md → help.html, the shared template) and a Help button in the editor (2026-11-03)
 
 ## Later
 - [ ] Map files: save and load tables; Scala `.kbm` import and export
