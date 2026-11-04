@@ -7,14 +7,17 @@ octave, and the pattern repeats every octave. Put it in front of a synth and a p
 
 EDOSpread12 makes no sound of its own. It changes the notes going to the synth after it.
 
+![EDOSpread12's editor](docs/screenshot.png)
+
 | | |
 |---|---|
 | Format | CLAP |
 | Platforms | Linux x86-64, macOS 26 or later on Apple Silicon. No Windows |
-| Version | 0.1.0 (not released) |
+| Version | 0.9.0 (preview) |
 | License | MIT |
 
-This repo has the source only.
+**Downloads:** ready-built plugins will be on itch.io with the 0.9 preview. This repo has the
+source only.
 
 ## How it maps
 
@@ -76,15 +79,24 @@ The Unlikelyware synths ([PlainOldSynth](https://github.com/erickampman/PlainOld
 
 ## Installing
 
-Build it (below), then:
+The download holds `EDOSpread12.clap`. Put it in your CLAP folder (create the folder if it isn't
+there), then rescan plugins in your host:
+
+| | Linux | macOS |
+|---|---|---|
+| For you | `~/.clap` | `~/Library/Audio/Plug-Ins/CLAP` |
+| For every user | `/usr/lib/clap` | `/Library/Audio/Plug-Ins/CLAP` |
+
+On macOS, `~/Library` is hidden in Finder: Go ▸ Go to Folder opens it. The 0.9 previews aren't
+notarized, so macOS won't load a downloaded plugin until its quarantine flag is cleared:
 
 ```bash
-cmake --build build --target install-clap
+xattr -dr com.apple.quarantine ~/Library/Audio/Plug-Ins/CLAP/EDOSpread12.clap
 ```
 
-That links `EDOSpread12.clap` into your CLAP folder (`~/.clap` on Linux,
-`~/Library/Audio/Plug-Ins/CLAP` on macOS). Rescan plugins in your host; a host that is already
-running keeps the plugins it loaded, so quit and restart it.
+A host that is already running keeps the plugins it loaded: quit and restart it. To build
+EDOSpread12 yourself instead, see below; `cmake --build build --target install-clap` then links the
+build into your CLAP folder.
 
 ## Building from source
 
@@ -107,3 +119,9 @@ Questions and bug reports go to [GitHub Issues](https://github.com/erickampman/E
 
 MIT. See [LICENSE](LICENSE). The third-party components in the plugin, and their licenses, are in
 [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+## Trademarks
+
+Mac and macOS are trademarks of Apple Inc., registered in the U.S. and other countries. Linux is the
+registered trademark of Linus Torvalds in the U.S. and other countries. Other product names are
+trademarks of their owners, named here only to say what works with what.
