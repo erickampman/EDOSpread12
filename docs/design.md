@@ -158,8 +158,10 @@ Laid out top to bottom (2026-10-29):
 - **The arcs are thick strokes**, not filled ring segments: DPF's NanoVG has no stencil buffer, and
   without one it fills a concave path's whole bounding box.
 - **Help** (2026-11-03) is a "?" box at the header's right, StruckSynth's HelpButton as Retune
-  adapted it (no caption): a click writes the embedded help page and logo to `EDOSpread12-help` in
-  the temp folder and opens it in the browser. The page is `resources/help.md` in the synths' layout,
+  adapted it (no caption): a click writes the embedded help page to `EDOSpread12-help` in the temp
+  folder and opens it in the browser. The logo goes inside the page as a data: URL (2026-11-04): as
+  a file beside it, it was missing in snap Firefox on Linux, which the document portal hands only
+  the file opened. The page is `resources/help.md` in the synths' layout,
   built into `resources/help.html` with pandoc and the products' shared template (the command is in
   CMakeLists.txt) and committed.
 - **tools/preview_editor.mm** opens the editor alone in a window ("EDOSpread12 Preview.app", macOS):
