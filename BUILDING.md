@@ -149,4 +149,5 @@ on). What's different here, and why:
   `install-auv2`, and no clap-wrapper or VST3 SDK submodules.
 - A preview app for the editor (macOS), since a note effect's editor is otherwise only seen inside
   a host.
-- No `_WERROR` option and no CI yet (the build has no warnings today, on macOS).
+- No `_WERROR` option (the build has no warnings today, on macOS).
+- CI (`.github/workflows/ci.yml`) runs on `ubuntu-24.04`, the oldest Ubuntu supported, not `ubuntu-latest`, and on `macos-26`.
