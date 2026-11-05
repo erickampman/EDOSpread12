@@ -338,6 +338,9 @@ the circle.</li>
 marker round the circle to the step you want.</li>
 <li><strong>Start again</strong> with <strong>Fill all
 keys</strong>.</li>
+<li><strong>See a scale:</strong> choose one from the
+<strong>Scale</strong> menu under View. Its keys, and the steps they're
+on, light up.</li>
 </ol>
 <p>The host saves every setting with its project.</p>
 </section>
@@ -393,7 +396,8 @@ size is 688 × 480.</p>
 </tr>
 <tr>
 <td>Click a menu</td>
-<td>Opens its list; click a choice, or click elsewhere to close it</td>
+<td>Opens its list; click a choice, or click elsewhere to close it (a
+long list, such as Scale's, is in two columns)</td>
 </tr>
 <tr>
 <td>Click a piano key, or its mark on the circle</td>
@@ -439,6 +443,9 @@ see what a refill would do.</p>
 to its key on the piano: drag it round to give the key another step. It
 moves in whole steps; dragged past the top from the left, it lands on
 step N, the octave above.</p>
+<p><strong>With a <a href="#scale">Scale</a> chosen,</strong> its keys'
+names round the ring are in green, the ticks of the steps they're on are
+longer and green, and their marks have a green ring.</p>
 </section>
 <section id="piano" class="callout callout-note card">
 <h2>The Piano</h2>
@@ -451,6 +458,8 @@ key before it, or above the key after it) or shares a step with another
 key. Both are allowed: below 12-EDO some keys must share.</li>
 <li><strong>A lit key</strong> is one you're holding, in any octave and
 on any channel. Its mark on the circle lights too.</li>
+<li><strong>A green dot</strong> marks a key of the chosen <a
+href="#scale">Scale</a>.</li>
 </ul>
 </section>
 <section id="readout" class="callout callout-note card">
@@ -603,6 +612,12 @@ show which.</li>
 <li><strong>A scale on the white keys:</strong> with a C origin, put the
 seven white keys on the steps of your scale and the black keys on
 whatever is left.</li>
+<li><strong>Find a familiar scale in an EDO:</strong> choose it from
+Scale; after a refill, the lit steps show where its notes landed. Two
+scale keys sharing a step light one tick.</li>
+<li><strong>Scale follows Origin:</strong> to see D Dorian, set Origin
+to D and Scale to Dorian. Setting Origin moves the map too, so set it
+before you shape the keys.</li>
 <li><strong>Automate EDO safely:</strong> automation clamps rather than
 refills, so a sweep down and back up returns to your map.</li>
 </ul>
@@ -621,6 +636,10 @@ That's the design: only new notes take the new map.</li>
 off.</strong> They share a step. Move one.</li>
 <li><strong>Some notes make no sound.</strong> They were moved outside
 MIDI's 0–127 range.</li>
+<li><strong>Scale changed nothing I hear.</strong> It's a view only: it
+lights the scale's steps but never moves a key.</li>
+<li><strong>The wrong notes are lit.</strong> Scale counts from the
+Origin: with an A origin, Major lights A major.</li>
 <li><strong>A rebuilt EDOSpread12 doesn't show its changes.</strong>
 Quit and restart the host: a running host keeps the plugin it loaded
 first.</li>

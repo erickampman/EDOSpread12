@@ -40,6 +40,7 @@ The defaults (12-EDO, A origin, Nearest) leave every note where it was: EDOSprea
 3. **Play.** Keys you hold light up on the piano and on the circle.
 4. **Move a key:** click it on the piano, then drag its marker round the circle to the step you want.
 5. **Start again** with **Fill all keys**.
+6. **See a scale:** choose one from the **Scale** menu under View. Its keys, and the steps they're on, light up.
 
 The host saves every setting with its project.
 :::
@@ -66,7 +67,7 @@ The host saves every setting with its project.
 | Control-drag | Ten times finer (Control on the Mac too) |
 | Scroll over the knob | Change EDO |
 | Double-click or Shift-click the knob | Back to 12 |
-| Click a menu | Opens its list; click a choice, or click elsewhere to close it |
+| Click a menu | Opens its list; click a choice, or click elsewhere to close it (a long list, such as Scale's, is in two columns) |
 | Click a piano key, or its mark on the circle | Selects that key |
 | Drag the selected key's marker | Moves the key round the circle, a whole step at a time |
 | Click the ring away from any mark | Moves the selected key to that step |
@@ -87,6 +88,8 @@ The circle is one octave of the chosen EDO: **N steps** round it, step 0 (the or
 Changing Fill moves the arcs at once, before you refill, so you can see what a refill would do.
 
 **Each key's step is a mark on the circle**, named. The **selected key's** mark is the large one, joined by a curve to its key on the piano: drag it round to give the key another step. It moves in whole steps; dragged past the top from the left, it lands on step N, the octave above.
+
+**With a [Scale](#scale) chosen,** its keys' names round the ring are in green, the ticks of the steps they're on are longer and green, and their marks have a green ring.
 :::
 
 ::: {.callout .callout-note .card}
@@ -96,6 +99,7 @@ One octave, laid out straight, starting at the origin key.
 - **Click a key** to select it: a curve joins it to its marker on the circle.
 - **An orange key** is out of order (on a step below the key before it, or above the key after it) or shares a step with another key. Both are allowed: below 12-EDO some keys must share.
 - **A lit key** is one you're holding, in any octave and on any channel. Its mark on the circle lights too.
+- **A green dot** marks a key of the chosen [Scale](#scale).
 :::
 
 ::: {.callout .callout-note .card}
@@ -181,6 +185,8 @@ The Unlikelyware synths play Pitch 7.9, and PlainOldSynth, StruckSynth, StruckRo
 - **Learn an EDO by ear:** pick it, leave Fill on Nearest, and play familiar tunes: the read-out shows how far each key has moved.
 - **Below 12-EDO** keys must share steps; the orange keys show which.
 - **A scale on the white keys:** with a C origin, put the seven white keys on the steps of your scale and the black keys on whatever is left.
+- **Find a familiar scale in an EDO:** choose it from Scale; after a refill, the lit steps show where its notes landed. Two scale keys sharing a step light one tick.
+- **Scale follows Origin:** to see D Dorian, set Origin to D and Scale to Dorian. Setting Origin moves the map too, so set it before you shape the keys.
 - **Automate EDO safely:** automation clamps rather than refills, so a sweep down and back up returns to your map.
 :::
 
@@ -191,5 +197,7 @@ The Unlikelyware synths play Pitch 7.9, and PlainOldSynth, StruckSynth, StruckRo
 - **Changing a key didn't change the note I'm holding.** That's the design: only new notes take the new map.
 - **Two keys play the same note, and one cuts the other off.** They share a step. Move one.
 - **Some notes make no sound.** They were moved outside MIDI's 0–127 range.
+- **Scale changed nothing I hear.** It's a view only: it lights the scale's steps but never moves a key.
+- **The wrong notes are lit.** Scale counts from the Origin: with an A origin, Major lights A major.
 - **A rebuilt EDOSpread12 doesn't show its changes.** Quit and restart the host: a running host keeps the plugin it loaded first.
 :::
