@@ -26,7 +26,7 @@ set(UW_CORE_CLAP_INCLUDE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/external/clap/include"
 add_subdirectory(${EDOSPREAD12_UW_CORE_DIR} uw-core)
 
 # --- core: EDOSpread12's rules over uw::ump, no CLAP ------------------------------------------
-add_library(edospread12_core STATIC src/SpreadCore.cpp)
+add_library(edospread12_core STATIC src/SpreadCore.cpp src/EdoFacts.cpp)
 target_include_directories(edospread12_core PUBLIC src)
 target_link_libraries(edospread12_core PUBLIC uw::ump)
 set_target_properties(edospread12_core PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)

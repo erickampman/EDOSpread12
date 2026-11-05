@@ -15,7 +15,7 @@
 
 **The map —** [The Circle](#circle) · [The Piano](#piano) · [The Read-out](#readout)
 
-**The controls —** [EDO](#edo) · [Origin](#origin) · [Fill](#fill) · [Fill All Keys](#fill-all) · [Scale](#scale)
+**The controls —** [EDO](#edo) · [Origin](#origin) · [Fill](#fill) · [Fill All Keys](#fill-all) · [Scale](#scale) · [This EDO](#this-edo)
 
 **Playing —** [Hosts and Microtones](#hosts) · [Held Notes and MIDI](#midi) · [Tips](#tips) · [Troubleshooting](#troubleshooting)
 :::
@@ -51,8 +51,9 @@ The host saves every setting with its project.
 
 **Below it:**
 - **The map**, on the left: the [read-out](#readout) at the top, the [step circle](#circle), and a [piano octave](#piano) from the origin.
-- **Tuning**, on the right: [EDO](#edo), [Origin](#origin), [Fill](#fill) and [Fill all keys](#fill-all).
+- **Tuning**, on the right: [EDO](#edo), with [Origin](#origin) and [Fill](#fill) side by side below it, then [Fill all keys](#fill-all).
 - **View**, below it: the [Scale](#scale) menu.
+- **This EDO**, at the bottom: [what the EDO does with the diatonic scale](#this-edo).
 
 **Resizing:** drag the host window's corner. The window keeps its shape (860 × 600) and scales everything in it; the smallest size is 688 × 480.
 :::
@@ -155,6 +156,30 @@ Lights a scale on the map, starting from the [origin](#origin): **None** (defaul
 :::
 
 ::: {.callout .callout-note .card}
+## This EDO {#this-edo}
+What the chosen [EDO](#edo) does with the familiar diatonic scale, so you can tell before you play whether 12-tone music will keep its shape in it. It follows the EDO knob, not your hand edits.
+
+| Row | What it says |
+|---|---|
+| **Fifth** | The EDO's own fifth: the step nearest a pure fifth (3/2), and its size in cents |
+| **From 3/2** | How far that fifth is from pure: + sharp, − flat |
+| **Diatonic** | The 7-note scale you get by stacking that fifth, as its large step to its small step |
+| **Meantone 81/80** | **yes:** classical harmony and voice-leading work much as in 12 |
+| **Augmented 128/125** | **yes:** three major thirds make an octave, as C E G# C does in 12 |
+| **Diminished 648/625** | **yes:** four minor thirds make an octave, as C Eb Gb A C does in 12 |
+
+**Diatonic** reads as a ratio, large step to small: 2:1 in 12-EDO (whole step, half step), 3:2 in 19 (soft, near-equal steps), 3:1 in 17 and 4:1 in 22 (wide whole steps, tiny half steps). Or:
+- **7 equal steps** (7-EDO, 14, 21 …): every step of the scale is the same size.
+- **5 equal steps** (5, 10, 15 …): the half steps vanish, leaving a pentatonic.
+- **mavila** (9, 16, 23 …): the fifth is so flat that the large and small steps swap, and major and minor trade places.
+- **none:** the fifth is too wide or too narrow to make a 7-note scale at all.
+
+**A comma** is a tiny interval between two routes to "the same" note. An EDO that tempers it out (a **yes**, in green) treats the two as one note. 12-EDO tempers out all three; 19 and 31 only the meantone comma; 17, 22 and 53 none of them, so in those some 12-tone progressions don't come back to where they started.
+
+**It's a view only,** like Scale: it changes nothing you hear.
+:::
+
+::: {.callout .callout-note .card}
 ## Hosts and Microtones {#hosts}
 What EDOSpread12 receives decides what it can send:
 
@@ -186,6 +211,7 @@ The Unlikelyware synths play Pitch 7.9, and PlainOldSynth, StruckSynth, StruckRo
 - **Below 12-EDO** keys must share steps; the orange keys show which.
 - **A scale on the white keys:** with a C origin, put the seven white keys on the steps of your scale and the black keys on whatever is left.
 - **Find a familiar scale in an EDO:** choose it from Scale; after a refill, the lit steps show where its notes landed. Two scale keys sharing a step light one tick.
+- **Pick an EDO for 12-tone music:** turn EDO and watch This EDO. **Meantone yes** with a **Diatonic** ratio means familiar harmony will mostly carry over (19, 31); a ratio with **no** commas (17, 22) means the scale is there but chords will behave differently.
 - **Scale follows Origin:** to see D Dorian, set Origin to D and Scale to Dorian. Setting Origin moves the map too, so set it before you shape the keys.
 - **Automate EDO safely:** automation clamps rather than refills, so a sweep down and back up returns to your map.
 :::

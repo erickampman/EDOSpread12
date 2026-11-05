@@ -295,7 +295,8 @@ Started</a> · <a href="#window">The Window</a></p>
 href="#piano">The Piano</a> · <a href="#readout">The Read-out</a></p>
 <p><strong>The controls —</strong> <a href="#edo">EDO</a> · <a
 href="#origin">Origin</a> · <a href="#fill">Fill</a> · <a
-href="#fill-all">Fill All Keys</a> · <a href="#scale">Scale</a></p>
+href="#fill-all">Fill All Keys</a> · <a href="#scale">Scale</a> · <a
+href="#this-edo">This EDO</a></p>
 <p><strong>Playing —</strong> <a href="#hosts">Hosts and Microtones</a>
 · <a href="#midi">Held Notes and MIDI</a> · <a href="#tips">Tips</a> ·
 <a href="#troubleshooting">Troubleshooting</a></p>
@@ -356,11 +357,13 @@ opens this page in your browser).</p>
 href="#readout">read-out</a> at the top, the <a href="#circle">step
 circle</a>, and a <a href="#piano">piano octave</a> from the
 origin.</li>
-<li><strong>Tuning</strong>, on the right: <a href="#edo">EDO</a>, <a
-href="#origin">Origin</a>, <a href="#fill">Fill</a> and <a
-href="#fill-all">Fill all keys</a>.</li>
+<li><strong>Tuning</strong>, on the right: <a href="#edo">EDO</a>, with
+<a href="#origin">Origin</a> and <a href="#fill">Fill</a> side by side
+below it, then <a href="#fill-all">Fill all keys</a>.</li>
 <li><strong>View</strong>, below it: the <a href="#scale">Scale</a>
 menu.</li>
+<li><strong>This EDO</strong>, at the bottom: <a href="#this-edo">what
+the EDO does with the diatonic scale</a>.</li>
 </ul>
 <p><strong>Resizing:</strong> drag the host window's corner. The window
 keeps its shape (860 × 600) and scales everything in it; the smallest
@@ -540,6 +543,72 @@ its lit step too.</p>
 <p><strong>It's a view only:</strong> it changes no step and sends
 nothing. It's saved with the project, not automated.</p>
 </section>
+<section id="this-edo" class="callout callout-note card">
+<h2>This EDO</h2>
+<p>What the chosen <a href="#edo">EDO</a> does with the familiar
+diatonic scale, so you can tell before you play whether 12-tone music
+will keep its shape in it. It follows the EDO knob, not your hand
+edits.</p>
+<table>
+<thead>
+<tr>
+<th>Row</th>
+<th>What it says</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Fifth</strong></td>
+<td>The EDO's own fifth: the step nearest a pure fifth (3/2), and its
+size in cents</td>
+</tr>
+<tr>
+<td><strong>From 3/2</strong></td>
+<td>How far that fifth is from pure: + sharp, − flat</td>
+</tr>
+<tr>
+<td><strong>Diatonic</strong></td>
+<td>The 7-note scale you get by stacking that fifth, as its large step
+to its small step</td>
+</tr>
+<tr>
+<td><strong>Meantone 81/80</strong></td>
+<td><strong>yes:</strong> classical harmony and voice-leading work much
+as in 12</td>
+</tr>
+<tr>
+<td><strong>Augmented 128/125</strong></td>
+<td><strong>yes:</strong> three major thirds make an octave, as C E G# C
+does in 12</td>
+</tr>
+<tr>
+<td><strong>Diminished 648/625</strong></td>
+<td><strong>yes:</strong> four minor thirds make an octave, as C Eb Gb A
+C does in 12</td>
+</tr>
+</tbody>
+</table>
+<p><strong>Diatonic</strong> reads as a ratio, large step to small: 2:1
+in 12-EDO (whole step, half step), 3:2 in 19 (soft, near-equal steps),
+3:1 in 17 and 4:1 in 22 (wide whole steps, tiny half steps). Or:</p>
+<ul>
+<li><strong>7 equal steps</strong> (7-EDO, 14, 21 …): every step of the
+scale is the same size.</li>
+<li><strong>5 equal steps</strong> (5, 10, 15 …): the half steps vanish,
+leaving a pentatonic.</li>
+<li><strong>mavila</strong> (9, 16, 23 …): the fifth is so flat that the
+large and small steps swap, and major and minor trade places.</li>
+<li><strong>none:</strong> the fifth is too wide or too narrow to make a
+7-note scale at all.</li>
+</ul>
+<p><strong>A comma</strong> is a tiny interval between two routes to
+"the same" note. An EDO that tempers it out (a <strong>yes</strong>, in
+green) treats the two as one note. 12-EDO tempers out all three; 19 and
+31 only the meantone comma; 17, 22 and 53 none of them, so in those some
+12-tone progressions don't come back to where they started.</p>
+<p><strong>It's a view only,</strong> like Scale: it changes nothing you
+hear.</p>
+</section>
 <section id="hosts" class="callout callout-note card">
 <h2>Hosts and Microtones</h2>
 <p>What EDOSpread12 receives decides what it can send:</p>
@@ -615,6 +684,11 @@ whatever is left.</li>
 <li><strong>Find a familiar scale in an EDO:</strong> choose it from
 Scale; after a refill, the lit steps show where its notes landed. Two
 scale keys sharing a step light one tick.</li>
+<li><strong>Pick an EDO for 12-tone music:</strong> turn EDO and watch
+This EDO. <strong>Meantone yes</strong> with a <strong>Diatonic</strong>
+ratio means familiar harmony will mostly carry over (19, 31); a ratio
+with <strong>no</strong> commas (17, 22) means the scale is there but
+chords will behave differently.</li>
 <li><strong>Scale follows Origin:</strong> to see D Dorian, set Origin
 to D and Scale to Dorian. Setting Origin moves the map too, so set it
 before you shape the keys.</li>

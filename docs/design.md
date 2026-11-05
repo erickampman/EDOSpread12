@@ -167,6 +167,23 @@ Laid out top to bottom (2026-10-29):
   parameter (nothing to automate), but it's kept in the state by name (a `scale <name>` line, so a
   change to the menu moves no saved choice; a state without one, or with a name not in the menu, is
   None), and the editor marks the state dirty when it changes.
+- **Tuning's layout** (2026-11-04): Origin and Fill side by side, Fill all keys below them, and the
+  EDO knob above in what's left, laid out by hand rather than by GroupBox's equal rows, so the knob
+  keeps its size with This EDO below.
+- **This EDO** (2026-11-04), a group below View: what the chosen EDO does with the diatonic scale,
+  in six rows (src/EdoFacts.h, `FactsView.hpp`). All of it is integer math on N from the EDO's
+  patent val (the nearest whole steps to 2, 3 and 5: N, round(N log2 3), round(N log2 5)):
+  - *Fifth:* v3 − v2 steps, in cents, and its distance from 3/2 (701.955¢).
+  - *Diatonic:* the 5L2s scale the chain of fifths makes, L = 2F − N and s = 3N − 5F: their ratio
+    when L > s > 0; "7 equal steps" when L = s; "5 equal steps" when s = 0; "mavila, L:s" when the
+    fifth is flat of 7-EDO's and s > L; "none" for a fifth of 600¢ or less, or sharp of 720¢.
+  - *Three commas,* "yes" (in the accent) when the val sends them to no steps: 81/80 (meantone:
+    classical harmony works much as in 12), 128/125 (augmented: three major thirds make an
+    octave) and 648/625 (diminished: four minor thirds make an octave).
+
+  It describes N-EDO, not the 12 keys' steps as they are: hand edits don't change it. Pure math
+  with no CLAP or UMP, so it can move to uw-core for KeyboardEDO and NoteGran Chords after the
+  release; KeyboardEDO's `edoFifth()` already gives the same fifth.
 - **Held keys** are lit on the piano and their marks on the circle (any octave, any channel).
 - **The arcs are thick strokes**, not filled ring segments: DPF's NanoVG has no stencil buffer, and
   without one it fills a concave path's whole bounding box.

@@ -9,6 +9,7 @@
 #include <string>
 #include <vector>
 
+#include "EdoFacts.h"
 #include "SpreadCore.h"
 #include "uw/clap/ClapNoteRemap.h"
 #include "uw/ump/Ump.h"
@@ -287,6 +288,66 @@ void testScales() {
     CHECK(up(wh, 1) == bits({0, 1, 3, 4, 6, 7, 9, 10}) && up(wh, 2) == bits({1, 2, 4, 5, 7, 8, 10, 11}) && up(wh, 3) == wh);
 }
 
+// The This EDO facts (src/EdoFacts.h), against values worked out by hand and the familiar cases:
+// 12 tempers all three commas, 19 and 31 are meantone, 17 and 22 temper none, 16 is mavila.
+void testEdoFacts() {
+    struct Case {
+        int      edo, fifth, large, small;
+        Diatonic diatonic;
+        bool     meantone, augmented, diminished;
+    };
+    const Case cases[] = {
+        {1,  1,  1,  -2, Diatonic::None,       false, false, false},
+        {2,  1,  0,  1,  Diatonic::None,       false, false, false},
+        {5,  3,  1,  0,  Diatonic::Pentatonic, true,  false, false},
+        {7,  4,  1,  1,  Diatonic::Equal,      true,  false, false},
+        {9,  5,  1,  2,  Diatonic::Mavila,     false, true,  false},
+        {10, 6,  2,  0,  Diatonic::Pentatonic, false, false, false},
+        {12, 7,  2,  1,  Diatonic::Proper,     true,  true,  true},
+        {13, 8,  3,  -1, Diatonic::None,       false, false, false},
+        {16, 9,  2,  3,  Diatonic::Mavila,     false, false, true},
+        {17, 10, 3,  1,  Diatonic::Proper,     false, false, false},
+        {19, 11, 3,  2,  Diatonic::Proper,     true,  false, false},
+        {22, 13, 4,  1,  Diatonic::Proper,     false, false, false},
+        {24, 14, 4,  2,  Diatonic::Proper,     true,  true,  true},
+        {31, 18, 5,  3,  Diatonic::Proper,     true,  false, false},
+        {53, 31, 9,  4,  Diatonic::Proper,     false, false, false},
+        {72, 42, 12, 6,  Diatonic::Proper,     false, false, false},
+        {96, 56, 16, 8,  Diatonic::Proper,     false, false, false},   // 223 steps for 5: not 12-EDO×8
+    };
+    for (const Case& c : cases) {
+        const EdoFacts f = edoFacts(c.edo);
+        const bool ok = f.edo == c.edo && f.fifth == c.fifth && f.large == c.large && f.small == c.small &&
+                        f.diatonic == c.diatonic && f.meantone == c.meantone && f.augmented == c.augmented &&
+                        f.diminished == c.diminished;
+        CHECK(ok);
+        if (!ok) std::fprintf(stderr, "  (%d-EDO: fifth %d, L:s %d:%d)\n", c.edo, f.fifth, f.large, f.small);
+    }
+    // Five fifths less three octaves and two fifths less an octave: 5L2s spans the octave.
+    for (int n = kMinEdo; n <= kMaxEdo; ++n) {
+        const EdoFacts f = edoFacts(n);
+        CHECK(5 * f.large + 2 * f.small == n);
+        CHECK(std::abs(f.fifthCents - 1200.0 * f.fifth / n) < 1e-9);
+        CHECK(std::abs(f.fifthError) <= 600.0 / n + 1e-9);   // the nearest step: within half a step
+    }
+    CHECK(edoFacts(0).edo == kMinEdo && edoFacts(500).edo == kMaxEdo);
+
+    FactRow rows[kFactRows];
+    factRows(edoFacts(19), rows);
+    CHECK(std::string(rows[0].label) == "Fifth" && std::string(rows[0].value) == "11 steps, 694.7\xc2\xa2");
+    CHECK(std::string(rows[1].value) == "-7.2\xc2\xa2");
+    CHECK(std::string(rows[2].value) == "3:2");
+    CHECK(std::string(rows[3].label) == "Meantone 81/80" && std::string(rows[3].value) == "yes" && rows[3].lit);
+    CHECK(std::string(rows[4].value) == "no" && !rows[4].lit);
+    factRows(edoFacts(16), rows);
+    CHECK(std::string(rows[2].value) == "mavila, 2:3");
+    CHECK(std::string(rows[5].value) == "yes" && rows[5].lit);
+    factRows(edoFacts(1), rows);
+    CHECK(std::string(rows[0].value) == "1 step, 1200.0\xc2\xa2" && std::string(rows[2].value) == "none");
+    factRows(edoFacts(53), rows);
+    CHECK(std::string(rows[1].value) == "-0.1\xc2\xa2");   // 701.887: rounds to -0.1, not "-0.0"
+}
+
 } // namespace
 
 int main() {
@@ -298,6 +359,7 @@ int main() {
     testSmallEdoSharedSteps();
     testOutOfRange();
     testScales();
+    testEdoFacts();
     if (failures != 0) {
         std::fprintf(stderr, "edospread12-core: %d check(s) failed\n", failures);
         return 1;

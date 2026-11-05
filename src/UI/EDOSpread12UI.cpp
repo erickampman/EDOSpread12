@@ -4,7 +4,8 @@
 // above a piano octave from the origin), and a Tuning group of the house widget kit (Knob,
 // Dropdown, GroupBox, PopupMenu, copied from NoteGran's): EDO, Origin, Fill, and a Fill button; below
 // it a Scale group, whose menu lights a scale's steps on the map (a view only, kept in the plugin's
-// state, not a parameter). Help, at the header's right, opens the help page (resources/help.md) in
+// state, not a parameter); and a This EDO group (FactsView.hpp), what the chosen EDO does with the
+// diatonic scale: its fifth, its 5L2s steps, and which of three commas it tempers out. Help, at the header's right, opens the help page (resources/help.md) in
 // the browser.
 //
 // Choosing a Fill, or turning EDO, here refills all 12 keys from the Fill, as one gesture with the
@@ -28,6 +29,7 @@
 #include <vector>
 
 #include "Dropdown.hpp"
+#include "FactsView.hpp"
 #include "HelpButton.hpp"
 #include "EmbeddedResources.hpp"   // build-time: the logo's bytes
 #include "GroupBox.hpp"
@@ -44,6 +46,7 @@ using DGL_NAMESPACE::Button;
 using DGL_NAMESPACE::Color;
 using DGL_NAMESPACE::HelpButton;
 using DGL_NAMESPACE::Dropdown;
+using DGL_NAMESPACE::FactsView;
 using DGL_NAMESPACE::GroupBox;
 using DGL_NAMESPACE::Knob;
 using DGL_NAMESPACE::Logo;
@@ -89,7 +92,7 @@ public:
         fGroup = std::make_unique<GroupBox>(this);
         fGroup->setTitle("Tuning");
         fGroup->setAccentColor(kAccent);
-        fGroup->setColumns(1);
+        fGroup->setColumns(1);   // laid out in layout(), not relayout(): EDO takes what the rest leave
 
         const clap_plugin_t* plugin = fPlugin;
         auto format = [plugin](uint32_t id) {
@@ -137,6 +140,14 @@ public:
         fScaleMenu->setChoices(scales);
         fScaleGroup->addControl(fScaleMenu.get());
 
+        fFactsGroup = std::make_unique<GroupBox>(this);
+        fFactsGroup->setTitle("This EDO");
+        fFactsGroup->setAccentColor(kAccent);
+        fFactsGroup->setColumns(1);
+        fFacts = std::make_unique<FactsView>(fFactsGroup.get());
+        fFacts->setAccent(kAccent);
+        fFactsGroup->addControl(fFacts.get());
+
         // help.html shows the logo as "Unlikelyware.png", so it is written out under that name.
         fHelp = std::make_unique<HelpButton>(this, std::vector<HelpButton::File>{
             {"EDOSpread12-help.html", EmbeddedResources::helpData, EmbeddedResources::helpDataSize},
@@ -157,8 +168,10 @@ public:
         fFillMenu.reset();
         fFillButton.reset();
         fScaleMenu.reset();
+        fFacts.reset();
         fGroup.reset();
         fScaleGroup.reset();
+        fFactsGroup.reset();
     }
 
 protected:
@@ -308,6 +321,7 @@ private:
 
     void show() {
         if (!fEdoDragging) fEdoKnob->setRealValue(static_cast<float>(fValues[kEdo]), false), fEdoKnob->repaint();
+        fFacts->setEdo(edo());
         fOriginMenu->setIndex(static_cast<int>(std::lround(fValues[kOrigin])));
         fFillMenu->setIndex(static_cast<int>(std::lround(fValues[kFill])));
         std::array<int, 12> steps{};
@@ -338,16 +352,36 @@ private:
         fView->setSize(static_cast<uint>(viewW), static_cast<uint>(bodyH));
         fView->setUiScale(s);
 
-        const int scaleH = static_cast<int>(96 * s), tuningH = std::min(bodyH - scaleH - gap, static_cast<int>(430 * s));
+        // Tuning takes what Scale and This EDO leave: three rows, EDO's the tallest.
+        const int scaleH = static_cast<int>(86 * s), factsH = static_cast<int>(134 * s);
+        const int tuningH = std::min(bodyH - scaleH - factsH - 2 * gap, static_cast<int>(430 * s));
         fGroup->setAbsolutePos(M + viewW + gap, hdr);
         fGroup->setSize(static_cast<uint>(sideW), static_cast<uint>(tuningH));
         fGroup->setUiScale(s);
-        fGroup->relayout();
+        {   // Origin and Fill side by side, Fill all keys below them, EDO above in the rest
+            int x, y, w, h;
+            fGroup->contentBounds(x, y, w, h);
+            const int menuH = static_cast<int>(46 * s), buttonH = static_cast<int>(34 * s);
+            const int knobH = std::max(h - menuH - buttonH, 0);
+            fEdoKnob->setAbsolutePos(x, y);
+            fEdoKnob->setSize(static_cast<uint>(w), static_cast<uint>(knobH));
+            fOriginMenu->setAbsolutePos(x, y + knobH);
+            fOriginMenu->setSize(static_cast<uint>(w / 2), static_cast<uint>(menuH));
+            fFillMenu->setAbsolutePos(x + w / 2, y + knobH);
+            fFillMenu->setSize(static_cast<uint>(w - w / 2), static_cast<uint>(menuH));
+            fFillButton->setAbsolutePos(x, y + knobH + menuH);
+            fFillButton->setSize(static_cast<uint>(w), static_cast<uint>(buttonH));
+        }
         fScaleGroup->setAbsolutePos(M + viewW + gap, hdr + tuningH + gap);
         fScaleGroup->setSize(static_cast<uint>(sideW), static_cast<uint>(scaleH));
         fScaleGroup->setUiScale(s);
         fScaleGroup->relayout();
         fScaleMenu->setUiScale(s);
+        fFactsGroup->setAbsolutePos(M + viewW + gap, hdr + tuningH + gap + scaleH + gap);
+        fFactsGroup->setSize(static_cast<uint>(sideW), static_cast<uint>(factsH));
+        fFactsGroup->setUiScale(s);
+        fFactsGroup->relayout();
+        fFacts->setUiScale(s);
         const float d = std::min({70.0f * s, static_cast<float>(fEdoKnob->getHeight()) - 38.0f * s,
                                   static_cast<float>(fEdoKnob->getWidth()) - 6.0f});
         fEdoKnob->setDiameter(std::max(d, 16.0f), s);
@@ -366,6 +400,8 @@ private:
     std::unique_ptr<Button>     fFillButton;
     std::unique_ptr<GroupBox>   fScaleGroup;
     std::unique_ptr<Dropdown>   fScaleMenu;
+    std::unique_ptr<GroupBox>   fFactsGroup;
+    std::unique_ptr<FactsView>  fFacts;
     int                         fScale = 0;   // index into es::kScales
     std::unique_ptr<HelpButton> fHelp;
     std::unique_ptr<PopupMenu>  fMenu;
