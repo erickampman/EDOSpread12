@@ -5,6 +5,8 @@
 #include <cmath>
 #include <cstdint>
 #include <cstdio>
+#include <initializer_list>
+#include <string>
 #include <vector>
 
 #include "SpreadCore.h"
@@ -228,6 +230,63 @@ void testOutOfRange() {
     CHECK(o.size() == 1 && ump::noteNumber(o[0]) == 120);
 }
 
+// The Scale menu: NoteGran Chords' list (core/Scales, spelled as places on the chain of fifths from
+// the key, C 0, G 1, D 2 … F -1), in its order, then the three diminished scales and Blues.
+void testScales() {
+    auto bits = [](std::initializer_list<int> keys) {
+        std::uint16_t m = 0;
+        for (int k : keys) m |= std::uint16_t(1u << k);
+        return m;
+    };
+    auto fifths = [](std::initializer_list<int> places) {
+        std::uint16_t m = 0;
+        for (int p : places) m |= std::uint16_t(1u << (((p * 7) % 12 + 12) % 12));
+        return m;
+    };
+    struct Want { const char* name; std::uint16_t keys; };
+    const Want want[] = {
+        {"None", 0},
+        {"Major (Ionian)", fifths({0, 2, 4, -1, 1, 3, 5})},
+        {"Dorian", fifths({0, 2, -3, -1, 1, 3, -2})},
+        {"Phrygian", fifths({0, -5, -3, -1, 1, -4, -2})},
+        {"Lydian", fifths({0, 2, 4, 6, 1, 3, 5})},
+        {"Mixolydian", fifths({0, 2, 4, -1, 1, 3, -2})},
+        {"Minor (Aeolian)", fifths({0, 2, -3, -1, 1, -4, -2})},
+        {"Locrian", fifths({0, -5, -3, -1, -6, -4, -2})},
+        {"Melodic minor", fifths({0, 2, -3, -1, 1, 3, 5})},
+        {"Dorian b2", fifths({0, -5, -3, -1, 1, 3, -2})},
+        {"Lydian augmented", fifths({0, 2, 4, 6, 8, 3, 5})},
+        {"Lydian dominant", fifths({0, 2, 4, 6, 1, 3, -2})},
+        {"Mixolydian b6", fifths({0, 2, 4, -1, 1, -4, -2})},
+        {"Locrian #2", fifths({0, 2, -3, -1, -6, -4, -2})},
+        {"Altered", fifths({0, -5, -3, -8, -6, -4, -2})},
+        {"Harmonic minor", fifths({0, 2, -3, -1, 1, -4, 5})},
+        {"Locrian #6", fifths({0, -5, -3, -1, -6, 3, -2})},
+        {"Ionian #5", fifths({0, 2, 4, -1, 8, 3, 5})},
+        {"Dorian #4", fifths({0, 2, -3, 6, 1, 3, -2})},
+        {"Phrygian dominant", fifths({0, -5, 4, -1, 1, -4, -2})},
+        {"Lydian #2", fifths({0, 9, 4, 6, 1, 3, 5})},
+        {"Ultralocrian", fifths({0, -5, -3, -8, -6, -4, -9})},
+        {"Harmonic major", fifths({0, 2, 4, -1, 1, -4, 5})},
+        {"Major pentatonic", fifths({0, 2, 4, 1, 3})},
+        {"Minor pentatonic", fifths({0, -3, -1, 1, -2})},
+        {"Whole tone", fifths({0, 2, 4, 6, 8, 10})},
+        {"Diminished (whole-half)", bits({0, 2, 3, 5, 6, 8, 9, 11})},
+        {"Diminished (half-whole)", bits({0, 1, 3, 4, 6, 7, 9, 10})},
+        {"Diminished (from the 2nd)", bits({1, 2, 4, 5, 7, 8, 10, 11})},
+        {"Blues", bits({0, 3, 5, 6, 7, 10})},
+    };
+    CHECK(kScaleCount == int(sizeof(want) / sizeof(want[0])));
+    for (int i = 0; i < kScaleCount && i < int(sizeof(want) / sizeof(want[0])); ++i) {
+        CHECK(std::string(kScales[i].name) == want[i].name);
+        CHECK(kScales[i].keys == want[i].keys);
+    }
+    // The three diminished sets are a half step apart, and between them hold every key twice.
+    const std::uint16_t wh = bits({0, 2, 3, 5, 6, 8, 9, 11});
+    auto up = [](std::uint16_t m, int n) { return std::uint16_t(((m << n) | (m >> (12 - n))) & 0xFFF); };
+    CHECK(up(wh, 1) == bits({0, 1, 3, 4, 6, 7, 9, 10}) && up(wh, 2) == bits({1, 2, 4, 5, 7, 8, 10, 11}) && up(wh, 3) == wh);
+}
+
 } // namespace
 
 int main() {
@@ -238,6 +297,7 @@ int main() {
     testHeldNoteKeepsItsPitch();
     testSmallEdoSharedSteps();
     testOutOfRange();
+    testScales();
     if (failures != 0) {
         std::fprintf(stderr, "edospread12-core: %d check(s) failed\n", failures);
         return 1;

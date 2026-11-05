@@ -37,6 +37,50 @@ struct Params {
     Table steps  = filled(Fill::Nearest, 12);
 };
 
+// The editor's Scale menu: a scale the circle highlights, from the origin. It changes no note: the
+// steps lit are the ones the scale's keys are mapped to. Bit d of `keys` is key d from the origin.
+// The list is NoteGran Chords' (its core/Scales, which KeyboardEDO shares), in its order and names,
+// then the three diminished scales and Blues. The diminished scale's 8 notes come in three sets, a
+// half step apart, so all three are here: whole-half from the origin, half-whole from it, and
+// whole-half from the 2nd (the origin isn't in it).
+struct Scale {
+    const char*   name;
+    std::uint16_t keys;
+};
+inline constexpr Scale kScales[] = {
+    {"None", 0},
+    {"Major (Ionian)", 0b1010'1011'0101},            // 0 2 4 5 7 9 11
+    {"Dorian", 0b0110'1010'1101},                    // 0 2 3 5 7 9 10
+    {"Phrygian", 0b0101'1010'1011},                  // 0 1 3 5 7 8 10
+    {"Lydian", 0b1010'1101'0101},                    // 0 2 4 6 7 9 11
+    {"Mixolydian", 0b0110'1011'0101},                // 0 2 4 5 7 9 10
+    {"Minor (Aeolian)", 0b0101'1010'1101},           // 0 2 3 5 7 8 10
+    {"Locrian", 0b0101'0110'1011},                   // 0 1 3 5 6 8 10
+    {"Melodic minor", 0b1010'1010'1101},             // 0 2 3 5 7 9 11
+    {"Dorian b2", 0b0110'1010'1011},                 // 0 1 3 5 7 9 10
+    {"Lydian augmented", 0b1011'0101'0101},          // 0 2 4 6 8 9 11
+    {"Lydian dominant", 0b0110'1101'0101},           // 0 2 4 6 7 9 10
+    {"Mixolydian b6", 0b0101'1011'0101},             // 0 2 4 5 7 8 10
+    {"Locrian #2", 0b0101'0110'1101},                // 0 2 3 5 6 8 10
+    {"Altered", 0b0101'0101'1011},                   // 0 1 3 4 6 8 10
+    {"Harmonic minor", 0b1001'1010'1101},            // 0 2 3 5 7 8 11
+    {"Locrian #6", 0b0110'0110'1011},                // 0 1 3 5 6 9 10
+    {"Ionian #5", 0b1011'0011'0101},                 // 0 2 4 5 8 9 11
+    {"Dorian #4", 0b0110'1100'1101},                 // 0 2 3 6 7 9 10
+    {"Phrygian dominant", 0b0101'1011'0011},         // 0 1 4 5 7 8 10
+    {"Lydian #2", 0b1010'1101'1001},                 // 0 3 4 6 7 9 11
+    {"Ultralocrian", 0b0011'0101'1011},              // 0 1 3 4 6 8 9
+    {"Harmonic major", 0b1001'1011'0101},            // 0 2 4 5 7 8 11
+    {"Major pentatonic", 0b0010'1001'0101},          // 0 2 4 7 9
+    {"Minor pentatonic", 0b0100'1010'1001},          // 0 3 5 7 10
+    {"Whole tone", 0b0101'0101'0101},                // 0 2 4 6 8 10
+    {"Diminished (whole-half)", 0b1011'0110'1101},   // 0 2 3 5 6 8 9 11
+    {"Diminished (half-whole)", 0b0110'1101'1011},   // 0 1 3 4 6 7 9 10
+    {"Diminished (from the 2nd)", 0b1101'1011'0110}, // 1 2 4 5 7 8 10 11
+    {"Blues", 0b0100'1110'1001},                     // 0 3 5 6 7 10
+};
+inline constexpr int kScaleCount = int(sizeof(kScales) / sizeof(kScales[0]));
+
 // Params with every field clamped to its range (steps to 0 … N, after N is clamped).
 Params clamped(const Params& p) noexcept;
 

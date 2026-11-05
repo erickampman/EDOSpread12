@@ -512,7 +512,7 @@ void testState() {
         CHECK(r.state->save(r.plugin, &os));
     }
     CHECK(sink.bytes == "EDOSpread12 1\nedo 19\norigin 0\nfill 0\nstep1 0\nstep2 2\nstep3 3\nstep4 5\n"
-                        "step5 6\nstep6 8\nstep7 10\nstep8 11\nstep9 13\nstep10 14\nstep11 16\nstep12 17\n");
+                        "step5 6\nstep6 8\nstep7 10\nstep8 11\nstep9 13\nstep10 14\nstep11 16\nstep12 17\nscale None\n");
 
     Instance r;
     if (!r.ok()) return;
@@ -528,6 +528,23 @@ void testState() {
     in.midi2(0, 0x40904500, 0x8000'0000);   // A4 from C: step 14 of 19, 60 + 168/19
     const auto out = r.process(in);
     CHECK(out.size() == 1 && (out[0].words[1] & 0xFFFF) == 60u * 512 + (2 * 512 * 12 * 14 + 19) / 38);
+
+    // The Scale menu's choice, kept in the state by name; unknown or missing, it's None.
+    auto scaleAfterLoading = [&r](const char* text) {
+        Source source{text};
+        const clap_istream_t is = {&source, Source::read};
+        if (!r.state->load(r.plugin, &is)) return std::string("load failed");
+        Sink out;
+        const clap_ostream_t os = {&out, Sink::write};
+        if (!r.state->save(r.plugin, &os)) return std::string("save failed");
+        const size_t at = out.bytes.find("\nscale ");
+        return at == std::string::npos ? std::string("none") : out.bytes.substr(at + 1, out.bytes.find('\n', at + 1) - at - 1);
+    };
+    CHECK(scaleAfterLoading("EDOSpread12 1\nedo 12\nscale Lydian dominant\n") == "scale Lydian dominant");
+    CHECK(scaleAfterLoading("EDOSpread12 1\nscale Diminished (from the 2nd)\n") == "scale Diminished (from the 2nd)");
+    CHECK(scaleAfterLoading("EDOSpread12 1\nscale Lydian\n") == "scale Lydian");   // not Lydian #2 or the rest
+    CHECK(scaleAfterLoading("EDOSpread12 1\nscale Hungarian\n") == "scale None");
+    CHECK(scaleAfterLoading("EDOSpread12 1\nedo 12\n") == "scale None");
 
     Source bad{"Retune 1\n"};
     const clap_istream_t badStream = {&bad, Source::read};

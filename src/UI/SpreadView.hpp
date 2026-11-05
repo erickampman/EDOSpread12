@@ -10,6 +10,8 @@
 //   a mark selects its key.
 // - The piano: one octave from the origin, laid out straight. A click selects a key; a curve joins
 //   it to its indicator. A key out of order or sharing a step is tinted; a held key is lit.
+// - A Scale (the editor's menu) lights the steps its keys are mapped to: their ticks and the keys' names
+//   round the ring in the accent, their marks ringed, their piano keys dotted. It's a view only; it changes no step.
 // - Button: a plain push button, for Fill (a refill with the current choice).
 
 #ifndef EDOSPREAD12_SPREADVIEW_HPP
@@ -151,6 +153,13 @@ public:
         fHeld = held;
         repaint();
     }
+    // The scale's keys from the origin, bit d for key d; 0 for none.
+    void setScale(uint16_t keys)
+    {
+        if (keys == fScale) return;
+        fScale = keys;
+        repaint();
+    }
     void setSelected(int degree) { fSelected = std::clamp(degree, 0, 11); repaint(); }
     int  selected() const { return fSelected; }
     bool dragging() const { return fDragging; }
@@ -186,21 +195,25 @@ protected:
                 fontFace(NANOVG_DEJAVU_SANS_TTF);
                 fontSize(10.5f * s);
                 textAlign(ALIGN_CENTER | ALIGN_MIDDLE);
-                fillColor(kDim);
+                fillColor(inScale(d) ? fAccent : kDim);
                 text(x, y, kNames[(fOrigin + d) % 12], nullptr);
             }
         }
 
-        // The N steps, ticked inside the ring; step 0 (the origin) longer.
+        // The N steps, ticked inside the ring; step 0 (the origin) longer, a step of the Scale in
+        // the accent (step N is step 0's place).
         const float t0 = ri - 2.0f * s;
         for (int k = 0; k < fEdo; ++k)
         {
-            const float len = (k == 0 ? 10.0f : 5.0f) * s;
+            const bool  lit = stepInScale(k) || (k == 0 && stepInScale(fEdo));
+            const float len = (k == 0 ? 10.0f : lit ? 9.0f : 5.0f) * s;
             float x0, y0, x1, y1;
             point(t0, k / float(fEdo), x0, y0);
             point(t0 - len, k / float(fEdo), x1, y1);
             beginPath(); moveTo(x0, y0); lineTo(x1, y1);
-            strokeColor(k == 0 ? kText : kDim); strokeWidth((k == 0 ? 1.6f : 1.0f) * s); stroke();
+            strokeColor(lit ? fAccent : k == 0 ? kText : kDim);
+            strokeWidth((lit ? 2.2f : k == 0 ? 1.6f : 1.0f) * s);
+            stroke();
         }
 
         // The selected key's curve, from the piano up to its indicator (under the marks).
@@ -360,12 +373,26 @@ private:
         return false;
     }
 
+    // A key of the Scale; a step one of its keys is mapped to.
+    bool inScale(int d) const { return ((fScale >> d) & 1) != 0; }
+    bool stepInScale(int step) const
+    {
+        for (int d = 0; d < 12; ++d)
+            if (inScale(d) && fSteps[d] == step) return true;
+        return false;
+    }
+
     void drawMark(int d, bool indicator)
     {
         using namespace spread;
         const float s = fUiScale;
         float x, y; markPoint(d, x, y);
         const float r = (indicator ? 11.0f : 7.5f) * s;
+        if (inScale(d))   // a ring outside the mark
+        {
+            beginPath(); circle(x, y, r + 3.0f * s);
+            strokeColor(fAccent); strokeWidth(1.8f * s); stroke();
+        }
         beginPath(); circle(x, y, r);
         if (indicator) fillColor(fAccent);
         else if (fHeld[d]) fillColor(withAlpha(fAccent, 0.85f));
@@ -402,6 +429,11 @@ private:
                 if (fHeld[d]) c = black ? withAlpha(fAccent, 0.9f) : fAccent;
                 fillColor(c); fill();
                 strokeColor(kBack); strokeWidth(1.0f * s); stroke();
+                if (inScale(d))   // a dot above the name
+                {
+                    beginPath(); circle(x + w / 2.0f, y + h - (black ? 25.0f : 30.0f) * s, (black ? 3.0f : 3.5f) * s);
+                    fillColor(fAccent); fill();
+                }
                 if (warned(d))
                 {
                     beginPath(); rect(x + 2.0f * s, y + h - 7.0f * s, w - 4.0f * s, 4.0f * s);
@@ -477,6 +509,7 @@ private:
     int                  fFill     = 1;
     std::array<int, 12>  fSteps{0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11};
     std::array<bool, 12> fHeld{};
+    uint16_t             fScale    = 0;
     int                  fSelected = 0;
     bool                 fDragging = false;
     // Geometry, from layout().

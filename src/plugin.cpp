@@ -134,6 +134,7 @@ struct Plugin {
     std::atomic<double> values[kParamCount];
     std::atomic<bool>   valuesChangedByState{false};   // state_load → process: re-apply
     std::atomic<bool>   namesChanged{false};           // Origin moved → main thread: rescan info
+    std::atomic<int>    scale{0};                      // the editor's Scale menu (es::kScales); state, not a parameter
 
     es::SpreadCore    core;        // MIDI 1.0 and 2.0; audio thread while active, main thread otherwise
     uw::ClapNoteRemap clapNotes;   // CLAP note events; likewise
@@ -508,7 +509,8 @@ const clap_plugin_params_t kParamsExt = {params_count, params_get_info, params_g
                                          params_value_to_text, params_text_to_value, params_flush};
 
 // ---------------------------------------------------------------------------------------------
-// state extension: "EDOSpread12 1" then "<symbol> <value>" lines; unknown symbols are ignored
+// state extension: "EDOSpread12 1" then "<symbol> <value>" lines; unknown symbols are ignored.
+// "scale <name>" is the editor's Scale menu (es::kScales), not a parameter
 // ---------------------------------------------------------------------------------------------
 
 bool state_save(const clap_plugin_t* plugin, const clap_ostream_t* stream) {
@@ -519,6 +521,8 @@ bool state_save(const clap_plugin_t* plugin, const clap_ostream_t* stream) {
         std::snprintf(line, sizeof(line), "%s %d\n", kParams[i].symbol, value(p, i));
         p->scratch += line;
     }
+    // The Scale menu's choice by name, so a change to the menu moves no saved choice.
+    p->scratch += std::string("scale ") + es::kScales[std::clamp(p->scale.load(std::memory_order_relaxed), 0, es::kScaleCount - 1)].name + "\n";
     const auto* bytes = reinterpret_cast<const uint8_t*>(p->scratch.data());
     for (uint64_t done = 0; done < p->scratch.size();) {
         const int64_t written = stream->write(stream, bytes + done, p->scratch.size() - done);
@@ -539,6 +543,7 @@ bool state_load(const clap_plugin_t* plugin, const clap_istream_t* stream) {
         text.append(buffer, size_t(read));
     }
     if (text.rfind("EDOSpread12 ", 0) != 0) return false;   // empty, or not ours
+    p->scale.store(0, std::memory_order_relaxed);            // a state saved before Scale has none
 
     size_t pos = text.find('\n');
     while (pos != std::string::npos && pos + 1 < text.size()) {
@@ -548,6 +553,10 @@ bool state_load(const clap_plugin_t* plugin, const clap_istream_t* stream) {
                                                                               : pos - start);
         const size_t space = line.find(' ');
         if (space == std::string::npos) continue;
+        if (line.compare(0, space, "scale") == 0)   // by name; one not in the menu is None
+            for (int i = 0; i < es::kScaleCount; ++i)
+                if (line.compare(space + 1, std::string::npos, es::kScales[i].name) == 0)
+                    p->scale.store(i, std::memory_order_relaxed);
         for (uint32_t i = 0; i < kParamCount; ++i)
             if (line.compare(0, space, kParams[i].symbol) == 0)
                 p->values[i].store(clampParam(i, std::strtod(line.c_str() + space + 1, nullptr)),
@@ -702,6 +711,17 @@ void es_param_set_from_gui(const clap_plugin_t* plugin, uint32_t index, double v
 
 void es_param_end_gesture(const clap_plugin_t* plugin, uint32_t index) {
     self(plugin)->guiEdits.push({GuiEdit::End, index, 0.0});
+}
+
+int es_scale(const clap_plugin_t* plugin) { return self(plugin)->scale.load(std::memory_order_relaxed); }
+
+void es_set_scale(const clap_plugin_t* plugin, int index) {
+    Plugin* p = self(plugin);
+    index     = std::clamp(index, 0, es::kScaleCount - 1);
+    if (p->scale.exchange(index, std::memory_order_relaxed) == index) return;
+    // Not a parameter, so the host learns of it only as a change of state.
+    const auto* hostState = static_cast<const clap_host_state_t*>(p->host->get_extension(p->host, CLAP_EXT_STATE));
+    if (hostState != nullptr && hostState->mark_dirty != nullptr) hostState->mark_dirty(p->host);
 }
 
 void es_held_keys(const clap_plugin_t* plugin, uint64_t words[2]) {

@@ -15,7 +15,7 @@
 
 **The map —** [The Circle](#circle) · [The Piano](#piano) · [The Read-out](#readout)
 
-**The controls —** [EDO](#edo) · [Origin](#origin) · [Fill](#fill) · [Fill All Keys](#fill-all)
+**The controls —** [EDO](#edo) · [Origin](#origin) · [Fill](#fill) · [Fill All Keys](#fill-all) · [Scale](#scale)
 
 **Playing —** [Hosts and Microtones](#hosts) · [Held Notes and MIDI](#midi) · [Tips](#tips) · [Troubleshooting](#troubleshooting)
 :::
@@ -51,6 +51,7 @@ The host saves every setting with its project.
 **Below it:**
 - **The map**, on the left: the [read-out](#readout) at the top, the [step circle](#circle), and a [piano octave](#piano) from the origin.
 - **Tuning**, on the right: [EDO](#edo), [Origin](#origin), [Fill](#fill) and [Fill all keys](#fill-all).
+- **View**, below it: the [Scale](#scale) menu.
 
 **Resizing:** drag the host window's corner. The window keeps its shape (860 × 600) and scales everything in it; the smallest size is 688 × 480.
 :::
@@ -132,6 +133,21 @@ How a refill gives the 12 keys their steps:
 ::: {.callout .callout-note .card}
 ## Fill All Keys {#fill-all}
 Refills all 12 keys with the current Fill, over any hand edits. Use it to start again.
+:::
+
+::: {.callout .callout-note .card}
+## Scale {#scale}
+Lights a scale on the map, starting from the [origin](#origin): **None** (default) or one of 29, the same list as NoteGran Chords and KeyboardEDO:
+- **The modes of the major scale:** Major (Ionian), Dorian, Phrygian, Lydian, Mixolydian, Minor (Aeolian), Locrian.
+- **Of melodic minor:** Melodic minor, Dorian b2, Lydian augmented, Lydian dominant, Mixolydian b6, Locrian #2, Altered.
+- **Of harmonic minor:** Harmonic minor, Locrian #6, Ionian #5, Dorian #4, Phrygian dominant, Lydian #2, Ultralocrian.
+- **And:** Harmonic major, Major and Minor pentatonic, Whole tone, the three diminished scales, and Blues.
+
+**The three diminished scales** are the three sets of eight notes the diminished (whole–half) scale can make, each a half step above the last (a fourth would be the first again): **whole-half** from the origin (A B C D D# F F# G# from A), **half-whole** from it (A A# C C# D# E F# G), and **whole-half from the 2nd** (B C# D E F G G# A# from A), which leaves the origin out.
+
+**The scale's keys are lit, and the steps they're mapped to:** their names round the ring and their ticks in the accent, their marks ringed, their piano keys dotted. In 12-EDO with an A origin, Lydian dominant lights A, B, C#, D#, E, F# and G. In another EDO the lit steps are wherever those keys are now, so moving a key's marker moves its lit step too.
+
+**It's a view only:** it changes no step and sends nothing. It's saved with the project, not automated.
 :::
 
 ::: {.callout .callout-note .card}

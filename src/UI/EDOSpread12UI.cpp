@@ -2,8 +2,10 @@
 //
 // The header (the Unlikelyware logo and "EDOSpread12"), the map (SpreadView.hpp: the step circle
 // above a piano octave from the origin), and a Tuning group of the house widget kit (Knob,
-// Dropdown, GroupBox, PopupMenu, copied from NoteGran's): EDO, Origin, Fill, and a Fill button. Help,
-// at the header's right, opens the help page (resources/help.md) in the browser.
+// Dropdown, GroupBox, PopupMenu, copied from NoteGran's): EDO, Origin, Fill, and a Fill button; below
+// it a Scale group, whose menu lights a scale's steps on the map (a view only, kept in the plugin's
+// state, not a parameter). Help, at the header's right, opens the help page (resources/help.md) in
+// the browser.
 //
 // Choosing a Fill, or turning EDO, here refills all 12 keys from the Fill, as one gesture with the
 // change (docs/design.md, "Filling the table"); host automation of EDO doesn't. The Fill button
@@ -63,6 +65,7 @@ constexpr int kWidth = DISTRHO_UI_DEFAULT_WIDTH, kHeight = DISTRHO_UI_DEFAULT_HE
 
 // Parameter ids (src/plugin.cpp).
 enum : uint32_t { kEdo = 0, kOrigin = 1, kFill = 2, kStep0 = 3, kParamCount = 15 };
+constexpr uint32_t kScaleMenu = 1000;   // the Scale menu's tag: not a parameter
 
 // The plugin whose UIExporter is being built, for the editor's constructor (gui_set_parent).
 const clap_plugin_t* gCreatingFor = nullptr;
@@ -122,6 +125,18 @@ public:
         fFillButton->setAccentColor(kAccent);
         fGroup->addControl(fFillButton.get());
 
+        fScaleGroup = std::make_unique<GroupBox>(this);
+        fScaleGroup->setTitle("View");
+        fScaleGroup->setAccentColor(kAccent);
+        fScaleGroup->setColumns(1);
+        fScaleMenu = std::make_unique<Dropdown>(fScaleGroup.get(), this);
+        fScaleMenu->setId(kScaleMenu);
+        fScaleMenu->setLabel("Scale");
+        std::vector<std::string> scales;
+        for (const es::Scale& sc : es::kScales) scales.emplace_back(sc.name);
+        fScaleMenu->setChoices(scales);
+        fScaleGroup->addControl(fScaleMenu.get());
+
         // help.html shows the logo as "Unlikelyware.png", so it is written out under that name.
         fHelp = std::make_unique<HelpButton>(this, std::vector<HelpButton::File>{
             {"EDOSpread12-help.html", EmbeddedResources::helpData, EmbeddedResources::helpDataSize},
@@ -141,7 +156,9 @@ public:
         fOriginMenu.reset();
         fFillMenu.reset();
         fFillButton.reset();
+        fScaleMenu.reset();
         fGroup.reset();
+        fScaleGroup.reset();
     }
 
 protected:
@@ -190,6 +207,9 @@ protected:
             refill(edo(), index == 0 ? es::Fill::Floor : es::Fill::Nearest);
             for (uint32_t d = 0; d < 12; ++d) editParameter(kStep0 + d, false);
             editParameter(kFill, false);
+        } else if (menu->tag() == kScaleMenu) {
+            fScale = std::clamp(index, 0, es::kScaleCount - 1);
+            if (fPlugin != nullptr) es_set_scale(fPlugin, fScale);
         }
         show();
     }
@@ -273,6 +293,9 @@ private:
     void refresh(bool all) {
         if (fPlugin == nullptr) return;
         bool changed = all;
+        const int scale = std::clamp(es_scale(fPlugin), 0, es::kScaleCount - 1);
+        if (scale != fScale) changed = true;
+        fScale = scale;
         for (uint32_t i = 0; i < kParamCount; ++i) {
             if (fEdoDragging && (i == kEdo || i >= kStep0)) continue;
             if (fView->dragging() && i == kStep0 + static_cast<uint32_t>(fView->selected())) continue;
@@ -291,6 +314,8 @@ private:
         for (uint32_t d = 0; d < 12; ++d) steps[d] = static_cast<int>(std::lround(fValues[kStep0 + d]));
         fView->setModel(edo(), static_cast<int>(std::lround(fValues[kOrigin])), static_cast<int>(std::lround(fValues[kFill])),
                         steps);
+        fScaleMenu->setIndex(fScale);
+        fView->setScale(es::kScales[fScale].keys);
     }
 
     void layout() {
@@ -313,10 +338,16 @@ private:
         fView->setSize(static_cast<uint>(viewW), static_cast<uint>(bodyH));
         fView->setUiScale(s);
 
+        const int scaleH = static_cast<int>(96 * s), tuningH = std::min(bodyH - scaleH - gap, static_cast<int>(430 * s));
         fGroup->setAbsolutePos(M + viewW + gap, hdr);
-        fGroup->setSize(static_cast<uint>(sideW), static_cast<uint>(std::min(bodyH, static_cast<int>(430 * s))));
+        fGroup->setSize(static_cast<uint>(sideW), static_cast<uint>(tuningH));
         fGroup->setUiScale(s);
         fGroup->relayout();
+        fScaleGroup->setAbsolutePos(M + viewW + gap, hdr + tuningH + gap);
+        fScaleGroup->setSize(static_cast<uint>(sideW), static_cast<uint>(scaleH));
+        fScaleGroup->setUiScale(s);
+        fScaleGroup->relayout();
+        fScaleMenu->setUiScale(s);
         const float d = std::min({70.0f * s, static_cast<float>(fEdoKnob->getHeight()) - 38.0f * s,
                                   static_cast<float>(fEdoKnob->getWidth()) - 6.0f});
         fEdoKnob->setDiameter(std::max(d, 16.0f), s);
@@ -333,6 +364,9 @@ private:
     std::unique_ptr<Knob>       fEdoKnob;
     std::unique_ptr<Dropdown>   fOriginMenu, fFillMenu;
     std::unique_ptr<Button>     fFillButton;
+    std::unique_ptr<GroupBox>   fScaleGroup;
+    std::unique_ptr<Dropdown>   fScaleMenu;
+    int                         fScale = 0;   // index into es::kScales
     std::unique_ptr<HelpButton> fHelp;
     std::unique_ptr<PopupMenu>  fMenu;
     bool                        fEdoDragging       = false;

@@ -295,7 +295,7 @@ Started</a> · <a href="#window">The Window</a></p>
 href="#piano">The Piano</a> · <a href="#readout">The Read-out</a></p>
 <p><strong>The controls —</strong> <a href="#edo">EDO</a> · <a
 href="#origin">Origin</a> · <a href="#fill">Fill</a> · <a
-href="#fill-all">Fill All Keys</a></p>
+href="#fill-all">Fill All Keys</a> · <a href="#scale">Scale</a></p>
 <p><strong>Playing —</strong> <a href="#hosts">Hosts and Microtones</a>
 · <a href="#midi">Held Notes and MIDI</a> · <a href="#tips">Tips</a> ·
 <a href="#troubleshooting">Troubleshooting</a></p>
@@ -356,6 +356,8 @@ origin.</li>
 <li><strong>Tuning</strong>, on the right: <a href="#edo">EDO</a>, <a
 href="#origin">Origin</a>, <a href="#fill">Fill</a> and <a
 href="#fill-all">Fill all keys</a>.</li>
+<li><strong>View</strong>, below it: the <a href="#scale">Scale</a>
+menu.</li>
 </ul>
 <p><strong>Resizing:</strong> drag the host window's corner. The window
 keeps its shape (860 × 600) and scales everything in it; the smallest
@@ -497,6 +499,37 @@ decides where the circle's arcs break.</p>
 <h2>Fill All Keys</h2>
 <p>Refills all 12 keys with the current Fill, over any hand edits. Use
 it to start again.</p>
+</section>
+<section id="scale" class="callout callout-note card">
+<h2>Scale</h2>
+<p>Lights a scale on the map, starting from the <a
+href="#origin">origin</a>: <strong>None</strong> (default) or one of 29,
+the same list as NoteGran Chords and KeyboardEDO:</p>
+<ul>
+<li><strong>The modes of the major scale:</strong> Major (Ionian),
+Dorian, Phrygian, Lydian, Mixolydian, Minor (Aeolian), Locrian.</li>
+<li><strong>Of melodic minor:</strong> Melodic minor, Dorian b2, Lydian
+augmented, Lydian dominant, Mixolydian b6, Locrian #2, Altered.</li>
+<li><strong>Of harmonic minor:</strong> Harmonic minor, Locrian #6,
+Ionian #5, Dorian #4, Phrygian dominant, Lydian #2, Ultralocrian.</li>
+<li><strong>And:</strong> Harmonic major, Major and Minor pentatonic,
+Whole tone, the three diminished scales, and Blues.</li>
+</ul>
+<p><strong>The three diminished scales</strong> are the three sets of
+eight notes the diminished (whole–half) scale can make, each a half step
+above the last (a fourth would be the first again):
+<strong>whole-half</strong> from the origin (A B C D D# F F# G# from A),
+<strong>half-whole</strong> from it (A A# C C# D# E F# G), and
+<strong>whole-half from the 2nd</strong> (B C# D E F G G# A# from A),
+which leaves the origin out.</p>
+<p><strong>The scale's keys are lit, and the steps they're mapped
+to:</strong> their names round the ring and their ticks in the accent,
+their marks ringed, their piano keys dotted. In 12-EDO with an A origin,
+Lydian dominant lights A, B, C#, D#, E, F# and G. In another EDO the lit
+steps are wherever those keys are now, so moving a key's marker moves
+its lit step too.</p>
+<p><strong>It's a view only:</strong> it changes no step and sends
+nothing. It's saved with the project, not automated.</p>
 </section>
 <section id="hosts" class="callout callout-note card">
 <h2>Hosts and Microtones</h2>

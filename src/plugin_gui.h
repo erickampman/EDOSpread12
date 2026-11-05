@@ -6,6 +6,7 @@
 //   es_plugin_*   per-instance plumbing
 //   es_param_*    a parameter's description, value and text, and edits with gestures
 //   es_held_keys  which keys are held on the input, for the editor to light
+//   es_scale      the Scale the editor highlights, saved with the state
 // Provided by the editor, called by plugin.cpp:
 //   es_gui_extension   the CLAP gui vtable for this platform
 //   es_gui_on_timer    CLAP timer-support: pumps the DPF/pugl event loop and refreshes the editor
@@ -46,6 +47,10 @@ void     es_param_text(const clap_plugin_t* plugin, uint32_t index, double value
 void es_param_begin_gesture(const clap_plugin_t* plugin, uint32_t index);
 void es_param_set_from_gui(const clap_plugin_t* plugin, uint32_t index, double value);
 void es_param_end_gesture(const clap_plugin_t* plugin, uint32_t index);
+
+// The editor's Scale menu (edospread12::kScales), kept in the plugin's state; not a parameter.
+int  es_scale(const clap_plugin_t* plugin);
+void es_set_scale(const clap_plugin_t* plugin, int index);
 
 // The input keys held now, on any channel: bit k of words[k / 64].
 void es_held_keys(const clap_plugin_t* plugin, uint64_t words[2]);

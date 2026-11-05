@@ -6,12 +6,14 @@
 //   "build/EDOSpread12 Preview.app/Contents/MacOS/EDOSpread12 Preview" /path/to/EDOSpread12.clap [id=value ...]
 //   e.g. … build/EDOSpread12.clap 0=19   (EDO 19; the steps stay as they are)
 // Parameter ids are src/plugin.cpp's: 0 EDO, 1 Origin, 2 Fill, 3 … 14 the steps from the origin.
+// "scale=Lydian dominant" picks a Scale menu entry by name (SpreadCore.h, kScales), through the state.
 
 #import <Cocoa/Cocoa.h>
 
 #include <clap/clap.h>
 #include <dlfcn.h>
 
+#include <algorithm>
 #include <cstdio>
 #include <cstdlib>
 #include <cstring>
@@ -132,6 +134,19 @@ int main(int argc, char** argv) {
 
         Settings settings;
         for (int i = 2; i < argc; ++i) {
+            if (std::strncmp(argv[i], "scale=", 6) == 0) {   // not a parameter: a line of the state
+                struct Text { std::string bytes; size_t pos = 0; } text{"EDOSpread12 1\nscale " + std::string(argv[i] + 6) + "\n"};
+                const clap_istream_t is = {&text, [](const clap_istream_t* s, void* buffer, uint64_t size) -> int64_t {
+                    auto* t = static_cast<Text*>(s->ctx);
+                    const size_t n = std::min<size_t>(size_t(size), t->bytes.size() - t->pos);
+                    std::memcpy(buffer, t->bytes.data() + t->pos, n);
+                    t->pos += n;
+                    return int64_t(n);
+                }};
+                const auto* state = static_cast<const clap_plugin_state_t*>(gPlugin->get_extension(gPlugin, CLAP_EXT_STATE));
+                if (state != nullptr) state->load(gPlugin, &is);
+                continue;
+            }
             clap_event_param_value_t ev{};
             ev.header   = {sizeof(ev), 0, CLAP_CORE_EVENT_SPACE_ID, CLAP_EVENT_PARAM_VALUE, 0};
             ev.param_id = clap_id(std::atoi(argv[i]));

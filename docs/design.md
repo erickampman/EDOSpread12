@@ -154,6 +154,19 @@ Laid out top to bottom (2026-10-29):
   ("C → step 5 of 19, 316¢, +16¢").
 - **Controls:** EDO knob, Origin dropdown, Fill dropdown and a "Fill all keys" button (refills with
   the current choice, over hand edits).
+- **Scale** (2026-11-04), a menu in a View group below Tuning: None (default) or one of 29 scales
+  (SpreadCore.h, `kScales`), counted from the origin. The list is NoteGran Chords' 25 (KeyboardEDO
+  shares them), in its order and names, then the three diminished scales and Blues (2026-11-04: the
+  three are to be added to NoteGran and KeyboardEDO too, so all three products agree). The
+  diminished scale makes three sets of 8 notes a half step apart, and all three are offered from
+  the origin: whole-half, half-whole, and whole-half from the 2nd (without the origin). The menu
+  wraps into two columns, since 30 rows are taller than the window. It lights the scale's keys and the steps
+  they're mapped to: the keys' names round the ring and those steps' ticks in the accent, their
+  marks ringed, their piano keys dotted. So in 12-EDO from A, Lydian dominant lights A B C# D# E F#
+  G; in N-EDO it's wherever those keys sit now, hand edits included. A view only: it isn't a
+  parameter (nothing to automate), but it's kept in the state by name (a `scale <name>` line, so a
+  change to the menu moves no saved choice; a state without one, or with a name not in the menu, is
+  None), and the editor marks the state dirty when it changes.
 - **Held keys** are lit on the piano and their marks on the circle (any octave, any channel).
 - **The arcs are thick strokes**, not filled ring segments: DPF's NanoVG has no stencil buffer, and
   without one it fills a concave path's whole bounding box.
