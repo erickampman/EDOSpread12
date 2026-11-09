@@ -35,9 +35,9 @@
 
 ## M3: Heard
 - [x] Heard in StageHand (2026-10-29)
-- [ ] StageHand in 19-EDO and 31-EDO specifically: KeyboardEDO (12-EDO piano) → EDOSpread12 → StruckSynth
+- [x] StageHand in 19-EDO and 31-EDO specifically: KeyboardEDO (12-EDO piano) → EDOSpread12 → StruckSynth (2026-11-09)
 - [x] Heard in Bitwig (2026-10-29)
-- [ ] An EDO below 12 (5-EDO): shared steps play without stuck notes
+- [x] An EDO below 12 (5-EDO): shared steps play without stuck notes (2026-11-09)
 
 ## M4: Editor
 - [x] DPF for drawing only (external/dpf, NoteGran's pin), NoteGran's widget kit, a sea-green accent (2026-10-29)
@@ -50,8 +50,8 @@
 - [x] Held keys lit on the piano and the circle (plugin_gui.h's es_held_keys)
 - [x] Tried in tools/preview_editor.mm ("EDOSpread12 Preview.app"): select, drag, Fill, EDO, Origin (2026-10-29)
 - [x] Seen working in a host with notes playing (2026-10-29)
-- [ ] A host's own change to EDO (an automation lane, or its parameter list) moves the knob and leaves the steps alone (clamped to 0 … N), as docs/design.md says
-- [ ] StageHand: host-side parameter control (automation, or mapping a controller to a plugin parameter); StageHand's work
+- [x] A host's own change to EDO (an automation lane, or its parameter list) moves the knob and leaves the steps alone (clamped to 0 … N), as docs/design.md says (REAPER's parameter sliders, 2026-11-09)
+- [ ] StageHand: host-side parameter control (automation, or mapping a controller to a plugin parameter); StageHand's work: Control Links can't drive a MIDI effect yet (StageHand M4). After the 0.9.0 preview (2026-11-09)
 
 ## M5: Other formats: not now (2026-10-29)
 - CLAP only. VST3 isn't planned: no MIDI-effect category, and every note would be rounded to a semitone.
