@@ -105,6 +105,7 @@ if(APPLE)
     set_target_properties(EDOSpread12 PROPERTIES
         BUNDLE TRUE
         BUNDLE_EXTENSION "clap"
+        MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/cmake/clap-Info.plist.in"
         MACOSX_BUNDLE_GUI_IDENTIFIER "com.unlikelyware.edospread12"
         MACOSX_BUNDLE_BUNDLE_NAME "EDOSpread12"
         MACOSX_BUNDLE_BUNDLE_VERSION "${PROJECT_VERSION}"
