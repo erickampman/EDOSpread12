@@ -51,6 +51,8 @@
 - [x] Tried in tools/preview_editor.mm ("EDOSpread12 Preview.app"): select, drag, Fill, EDO, Origin (2026-10-29)
 - [x] Seen working in a host with notes playing (2026-10-29)
 - [x] A host's own change to EDO (an automation lane, or its parameter list) moves the knob and leaves the steps alone (clamped to 0 … N), as docs/design.md says (REAPER's parameter sliders, 2026-11-09)
+- [x] REAPER 7.79 on the Mac, CLAP (2026-11-12): dragging a key to a different step in the editor changes the note it plays (ReleaseUMP R3-7)
+- [x] Bitwig on the Mac, CLAP (2026-11-12): at 19-EDO and 31-EDO neighbouring keys play the small steps, not semitones, and a saved project reopens with its settings (ReleaseUMP R3-7)
 - [ ] StageHand: host-side parameter control (automation, or mapping a controller to a plugin parameter); StageHand's work: Control Links can't drive a MIDI effect yet (StageHand M4). After the 0.9.0 preview (2026-11-09)
 
 ## M5: Other formats: not now (2026-10-29)
