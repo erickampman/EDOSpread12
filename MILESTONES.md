@@ -36,6 +36,7 @@
 ## M3: Heard
 - [x] Heard in StageHand (2026-10-29)
 - [x] StageHand in 19-EDO and 31-EDO specifically: KeyboardEDO (12-EDO piano) → EDOSpread12 → StruckSynth (2026-11-09)
+- [x] StageHand on the Mac, current builds (2026-11-12): KeyboardEDO → EDOSpread12 → each synth's CLAP (IFSynth, ModicumFM, PlainOldSynth, StruckGaussian, StruckRoom, StruckSynth; StruckKit's kit map makes it moot) (ReleaseUMP R3-4)
 - [x] Heard in Bitwig (2026-10-29)
 - [x] An EDO below 12 (5-EDO): shared steps play without stuck notes (2026-11-09)
 
