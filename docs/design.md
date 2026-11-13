@@ -211,7 +211,7 @@ Laid out top to bottom (2026-10-29):
   submodules, as Retune's M4, with `install-auv2` beside `install-clap`.
 - **Identity:** CLAP id `com.unlikelyware.edospread12`, vendor Unlikelyware. State header
   `EDOSpread12 1`. (A later AUv2: type `aumi`, subtype `ESpr` under `nLKL`.)
-- **Repo:** private, `erickampman/EDOSpread12`, as Retune.
+- **Repo:** public, `erickampman/EDOSpread12`, as Retune.
 
 ## Phases
 

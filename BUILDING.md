@@ -34,8 +34,8 @@ Of those libraries EDOSpread12 uses only the X11 and OpenGL ones, for the editor
 with `UW_CORE_UMP_ONLY`, which makes only `uw::ump`, plus `uw::clap-notes` against EDOSpread12's own
 CLAP headers (no JACK, ALSA, CoreAudio or CoreMIDI). The editor uses DPF (`external/dpf`) for
 drawing only: DGL, NanoVG and pugl, as NoteGran does. DPF is the author's fork (`erickampman/DPF`,
-which pins the pugl fork `erickampman/pugl`), as every DPF user's is; while the repos are private,
-cloning needs access to both. Python 3 embeds the logo at build time.
+which pins the pugl fork `erickampman/pugl`), as every DPF user's is.
+Python 3 embeds the logo at build time.
 
 ## Get the source
 
