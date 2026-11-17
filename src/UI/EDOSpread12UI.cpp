@@ -148,11 +148,11 @@ public:
         fFacts->setAccent(kAccent);
         fFactsGroup->addControl(fFacts.get());
 
-        // help.html shows the logo as "Unlikelyware.png", so it is written out under that name.
-        fHelp = std::make_unique<HelpButton>(this, std::vector<HelpButton::File>{
-            {"EDOSpread12-help.html", EmbeddedResources::helpData, EmbeddedResources::helpDataSize},
-            {"Unlikelyware.png", EmbeddedResources::Unlikelyware_Final_ColorData,
-             EmbeddedResources::Unlikelyware_Final_ColorDataSize}});
+        // help.md shows the logo as "Unlikelyware.png".
+        fHelp = std::make_unique<HelpButton>(this, "EDOSpread12 Help",
+            EmbeddedResources::helpData, EmbeddedResources::helpDataSize,
+            std::vector<DGL_NAMESPACE::uwhelp::Image>{{"Unlikelyware.png", EmbeddedResources::Unlikelyware_Final_ColorData,
+                                                       EmbeddedResources::Unlikelyware_Final_ColorDataSize}});
         fMenu = std::make_unique<PopupMenu>(this, this);   // last, so it draws on top
 
         refresh(true);

@@ -40,7 +40,7 @@ drag the marker round to give the key another step. Keys out of order or sharing
 and the keys you're playing light up. A **This EDO** panel shows what the chosen EDO does with the diatonic scale: its own fifth
 and how far it is from pure, the large-to-small step ratio of the scale that fifth makes, and whether it
 tempers out the meantone, augmented and diminished commas. The **?** at the top right opens the full help page
-([resources/help.md](resources/help.md)) in your browser.
+([resources/help.md](resources/help.md)) in a window of its own.
 
 ## Parameters
 

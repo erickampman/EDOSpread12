@@ -47,7 +47,7 @@ The host saves every setting with its project.
 
 ::: {.callout .callout-note .card}
 ## The Window {#window}
-**The header:** the Unlikelyware logo (a click opens unlikelyware.com), **EDOSpread12**, and **Help** at the right (the **?** box that opens this page in your browser).
+**The header:** the Unlikelyware logo (a click opens unlikelyware.com), **EDOSpread12**, and **Help** at the right (the **?** box that opens this page in a window of its own).
 
 **Below it:**
 - **The map**, on the left: the [read-out](#readout) at the top, the [step circle](#circle), and a [piano octave](#piano) from the origin.
