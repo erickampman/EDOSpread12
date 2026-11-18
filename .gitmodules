@@ -11,4 +11,4 @@
 	path = external/clap-wrapper
 	url = https://github.com/erickampman/clap-wrapper.git
 	ignore = dirty
-	branch = midi2-auv2-output
+	branch = unlikelyware

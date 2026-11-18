@@ -12,7 +12,7 @@
 // the nearest key instead, as in Retune.
 //
 // Inside clap-wrapper (the AUv2) the ports prefer MIDI 2.0 too, and MIDI 1.0 is promoted: the
-// wrapper is erickampman/clap-wrapper's midi2-auv2-output branch, whose AUv2 asks the host for
+// wrapper is erickampman/clap-wrapper's unlikelyware branch, whose AUv2 asks the host for
 // MIDI 2.0 input and passes MIDI 2.0 output whole to a host that takes event lists (Logic). Both
 // ports have id 0, as Retune's: the AUv2 wrapper sends an output event to the port whose id equals
 // the event's port_index.

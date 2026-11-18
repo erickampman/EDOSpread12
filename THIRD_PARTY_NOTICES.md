@@ -10,7 +10,7 @@ EDOSpread12 is MIT licensed (see the LICENSE file). Its plugins contain the comp
 | [NanoVG, with fontstash](https://github.com/memononen/nanovg) | in DPF | zlib | drawing the user interface, inside DPF |
 | [stb_image and stb_truetype](https://github.com/nothings/stb) | in DPF | Public domain (or MIT) | image and font loading, inside NanoVG |
 | [DejaVu Sans font](https://dejavu-fonts.github.io/) | in DPF | Bitstream Vera / DejaVu (free) | the interface text, embedded by DPF |
-| [clap-wrapper, Unlikelyware's fork](https://github.com/erickampman/clap-wrapper) | v0.16.0 + midi2-auv2-output | MIT | builds the AUv2 plugin from the CLAP one (macOS) |
+| [clap-wrapper, Unlikelyware's fork](https://github.com/erickampman/clap-wrapper) | v0.16.0 + `unlikelyware` branch | MIT | builds the AUv2 plugin from the CLAP one (macOS) |
 | [AudioUnitSDK](https://github.com/apple/AudioUnitSDK) | 1.1.0 | Apache-2.0 | the AUv2 plugin on macOS; clap-wrapper downloads it when configuring |
 
 Also from Unlikelyware, under the same MIT license: uw-core.

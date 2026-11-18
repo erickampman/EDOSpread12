@@ -137,7 +137,7 @@ add_custom_target(install-clap
 
 # --- AUv2 via clap-wrapper (macOS) -------------------------------------------------------------
 # The same plugin, wrapped as a MIDI effect ("aumi", Logic's MIDI FX slot). clap-wrapper is
-# erickampman/clap-wrapper's midi2-auv2-output branch: v0.16.0 (Retune's) plus an AUv2 that keeps a
+# erickampman/clap-wrapper's unlikelyware branch: v0.16.0 (Retune's) plus an AUv2 that keeps a
 # MIDI 2.0 plugin's output whole, so Pitch 7.9 reaches the next plugin in Logic (src/plugin.cpp).
 option(EDOSPREAD12_BUILD_AUV2 "Build EDOSpread12.component (AUv2 MIDI effect) via clap-wrapper (macOS)" ${APPLE})
 if(EDOSPREAD12_BUILD_AUV2 AND NOT APPLE)
