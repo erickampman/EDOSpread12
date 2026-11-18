@@ -8,12 +8,14 @@
 // as CLAP note events with the fraction as a tuning expression (uw-core's ClapNoteRemap). A
 // CLAP_EVENT_MIDI note on a whole key leaves as CLAP_EVENT_MIDI; one with a fraction leaves as
 // CLAP_EVENT_MIDI2, since MIDI 1.0 can't carry it (docs/design.md, "Behaviour"). That needs a host
-// that takes MIDI 2.0: where the host's note dialects don't include MIDI2, or inside clap-wrapper
-// (AUv2, VST3), MIDI 1.0 is rounded to the nearest key instead, as in Retune.
+// that takes MIDI 2.0: where the host's note dialects don't include MIDI2, MIDI 1.0 is rounded to
+// the nearest key instead, as in Retune.
 //
-// Inside clap-wrapper the ports prefer MIDI 1.0, and both have id 0, as Retune's: the AUv2 wrapper
-// turns MIDI 2.0 output into MIDI 1.0 with the key alone, and sends an output event to the port
-// whose id equals the event's port_index.
+// Inside clap-wrapper (the AUv2) the ports prefer MIDI 2.0 too, and MIDI 1.0 is promoted: the
+// wrapper is erickampman/clap-wrapper's midi2-auv2-output branch, whose AUv2 asks the host for
+// MIDI 2.0 input and passes MIDI 2.0 output whole to a host that takes event lists (Logic). Both
+// ports have id 0, as Retune's: the AUv2 wrapper sends an output event to the port whose id equals
+// the event's port_index.
 //
 // The step parameters are named for their keys, which the origin decides ("Step A", "Step A#" …
 // with an A origin). Changing Origin asks the host to rescan the parameter info.
@@ -351,13 +353,13 @@ void handleEvent(Plugin* p, const clap_event_header_t* h, const clap_output_even
 
 bool plug_init(const clap_plugin_t* plugin) {
     Plugin* p = self(plugin);
-    // Promote MIDI 1.0 to MIDI 2.0 only where MIDI 2.0 can leave: not inside clap-wrapper, and
-    // only to a host whose note dialects include MIDI2.
+    // Promote MIDI 1.0 to MIDI 2.0 only where MIDI 2.0 can leave: a host whose note dialects
+    // include MIDI2, or the AUv2 wrapper (its MIDI 2.0 output patch).
     const auto* notePorts = static_cast<const clap_host_note_ports_t*>(
         p->host->get_extension(p->host, CLAP_EXT_NOTE_PORTS));
     const bool hostMidi2 = notePorts != nullptr && notePorts->supported_dialects != nullptr &&
                            (notePorts->supported_dialects(p->host) & CLAP_NOTE_DIALECT_MIDI2) != 0;
-    p->core.setPromoteMidi1(hostMidi2 && !p->wrapped);
+    p->core.setPromoteMidi1(hostMidi2 || p->wrapped);
     return true;
 }
 
@@ -422,12 +424,12 @@ const clap_plugin_audio_ports_t kAudioPorts = {audio_ports_count, audio_ports_ge
 
 uint32_t note_ports_count(const clap_plugin_t*, bool) { return 1; }
 
-bool note_ports_get(const clap_plugin_t* plugin, uint32_t index, bool isInput, clap_note_port_info_t* info) {
+bool note_ports_get(const clap_plugin_t*, uint32_t index, bool isInput, clap_note_port_info_t* info) {
     if (index != 0) return false;
     std::memset(info, 0, sizeof(*info));
     info->id                 = 0;   // ids may overlap between inputs and outputs
     info->supported_dialects = CLAP_NOTE_DIALECT_CLAP | CLAP_NOTE_DIALECT_MIDI | CLAP_NOTE_DIALECT_MIDI2;
-    info->preferred_dialect  = self(plugin)->wrapped ? CLAP_NOTE_DIALECT_MIDI : CLAP_NOTE_DIALECT_MIDI2;
+    info->preferred_dialect  = CLAP_NOTE_DIALECT_MIDI2;
     std::snprintf(info->name, sizeof(info->name), "%s", isInput ? "Notes in" : "Notes out");
     return true;
 }

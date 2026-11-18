@@ -171,8 +171,9 @@ commands under "Build and test", and for a plugin `cmake --build build --target 
 same package list, the same `build/` folder, the same option names (`<PROJECT>_UW_CORE_DIR` and so
 on). What's different here, and why:
 
-- CLAP only: no VST3, and AUv2 deferred (docs/design.md, "Form"), so no `install-vst3` or
-  `install-auv2`, and no clap-wrapper or VST3 SDK submodules.
+- CLAP, and on the Mac an AUv2 MIDI effect (`install-auv2`), but no VST3 (docs/design.md, "Form"),
+  so no `install-vst3` and no VST3 SDK submodule. The clap-wrapper submodule is Unlikelyware's fork
+  (`midi2-auv2-output`), whose AUv2 keeps MIDI 2.0 output whole.
 - A preview app for the editor (macOS), since a note effect's editor is otherwise only seen inside
   a host.
 - No `_WERROR` option (the build has no warnings today, on macOS).

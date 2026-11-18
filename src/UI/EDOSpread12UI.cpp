@@ -545,6 +545,14 @@ bool gui_set_size(const clap_plugin_t* plugin, uint32_t width, uint32_t height) 
     return true;
 }
 
+// The editor's 60 Hz timer: values, and the keys held. Started at set_parent as well as show, since
+// clap-wrapper's AUv2 view never calls show (as Retune's editor).
+void startTimer(const clap_plugin_t* plugin, GuiState* gui) {
+    if (!gui->timerRegistered)
+        if (const auto* timer = hostTimer(plugin))
+            gui->timerRegistered = timer->register_timer(es_plugin_host(plugin), 16 /* ~60 fps */, &gui->timerId);
+}
+
 bool gui_set_parent(const clap_plugin_t* plugin, const clap_window_t* window) {
     auto* gui = static_cast<GuiState*>(es_plugin_get_gui(plugin));
     if (gui == nullptr || std::strcmp(window->api, kWindowApi) != 0) return false;
@@ -562,6 +570,7 @@ bool gui_set_parent(const clap_plugin_t* plugin, const clap_window_t* window) {
         gCreatingFor = nullptr;
         applySize(gui);
     }
+    startTimer(plugin, gui);
     return true;
 }
 
@@ -571,9 +580,7 @@ void gui_suggest_title(const clap_plugin_t*, const char*) {}
 bool gui_show(const clap_plugin_t* plugin) {
     auto* gui = static_cast<GuiState*>(es_plugin_get_gui(plugin));
     if (gui == nullptr || !gui->exporter) return false;
-    if (!gui->timerRegistered)
-        if (const auto* timer = hostTimer(plugin))
-            gui->timerRegistered = timer->register_timer(es_plugin_host(plugin), 16 /* ~60 fps */, &gui->timerId);
+    startTimer(plugin, gui);
     return true;
 }
 

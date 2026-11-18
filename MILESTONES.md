@@ -58,7 +58,11 @@
 
 ## M5: Other formats: not now (2026-10-29)
 - CLAP only. VST3 isn't planned: no MIDI-effect category, and every note would be rounded to a semitone.
-- AUv2 deferred: it would load in Logic's MIDI FX slot but play semitones only (see Later: MPE output).
+- [x] AUv2 built (2026-11-18): `EDOSPREAD12_BUILD_AUV2` (on by default on the Mac), `aumi` `Es12` `nLKL`, `install-auv2`; passes auval
+- [x] clap-wrapper fork (erickampman/clap-wrapper, `midi2-auv2-output`, from v0.16.0): a port whose plugin prefers MIDI2 gets a MIDI 2.0 output event list, and MIDI 2.0 output passes whole (a MIDI 1.0 down-conversion for the legacy callback). Inside the wrapper EDOSpread12 prefers MIDI 2.0 and promotes MIDI 1.0 (test/ClapTests.cpp)
+- [x] The editor's timer starts at set_parent too: clap-wrapper's AUv2 view never calls show, so the editor never refreshed (as Retune's)
+- [x] Heard in Logic Pro 12.4 (2026-11-18): KeyboardEDO (12-EDO) → EDOSpread12 AUv2 at 19-EDO → PlainOldSynth plays the small steps; Logic sent EDOSpread12 MIDI 2.0
+- [x] REAPER 7.79 on the Mac gives the AUv2 no MIDI (no keys lit, bypassing changes nothing), as Retune's AUv2 (ReleaseUMP R3-2)
 
 ## M6: Docs
 - [x] README.md, in Retune's shape: what it does, how it maps, the editor, parameters, hosts, installing (2026-10-29)

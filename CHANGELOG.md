@@ -5,6 +5,12 @@ All notable changes to EDOSpread12. Versions follow the git tags; the format is
 
 ## [Unreleased]
 
+### Added
+
+- An AUv2 MIDI effect on the Mac, for Logic's MIDI FX slot. Built with Unlikelyware's fork of
+  clap-wrapper, it sends MIDI 2.0 with each note's exact pitch, so in Logic the synth after it
+  plays the EDO's steps. REAPER doesn't pass notes through an AU MIDI effect; use the CLAP there.
+
 ### Changed
 
 - Help opens the help page in a window of the plugin's own, not in the web browser. Nothing is

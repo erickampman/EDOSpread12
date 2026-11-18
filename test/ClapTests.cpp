@@ -314,7 +314,7 @@ void testNotePorts() {
     Instance w(&kWrapperHost);
     if (!w.ok()) return;
     clap_note_port_info_t info{};
-    CHECK(w.notePorts->get(w.plugin, 0, true, &info) && info.preferred_dialect == CLAP_NOTE_DIALECT_MIDI);
+    CHECK(w.notePorts->get(w.plugin, 0, true, &info) && info.preferred_dialect == CLAP_NOTE_DIALECT_MIDI2);
 }
 
 void testParams() {
@@ -422,21 +422,39 @@ void testMidi1Promoted() {
 
 void testMidi1RoundedWithoutMidi2() {
     // C up to step 7 of 19 from A: 69 + 84/19 = 73.42, rounded to 73. No MIDI 2.0 out, because
-    // the host takes none, or because clap-wrapper can't carry it.
-    for (const clap_host_t* host : {&kMidi1Host, &kWrapperHost}) {
-        Instance r(host);
-        if (!r.ok()) return;
-        Input in;
-        set19(in);
-        in.param(0, kStep0 + 3, 7);
-        in.midi1(0, 0x90, 72, 100);
-        in.midi1(1, 0x80, 72, 0);
-        const auto out = r.process(in);
-        CHECK(out.size() == 2);
-        if (out.size() == 2) {
-            CHECK(isMidi1(out[0], 0, 0x90, 73, 100));
-            CHECK(isMidi1(out[1], 1, 0x80, 73, 0));
-        }
+    // the host takes none.
+    Instance r(&kMidi1Host);
+    if (!r.ok()) return;
+    Input in;
+    set19(in);
+    in.param(0, kStep0 + 3, 7);
+    in.midi1(0, 0x90, 72, 100);
+    in.midi1(1, 0x80, 72, 0);
+    const auto out = r.process(in);
+    CHECK(out.size() == 2);
+    if (out.size() == 2) {
+        CHECK(isMidi1(out[0], 0, 0x90, 73, 100));
+        CHECK(isMidi1(out[1], 1, 0x80, 73, 0));
+    }
+}
+
+void testMidi1PromotedInWrapper() {
+    // Inside clap-wrapper (the AUv2, whose patched output passes MIDI 2.0 whole) the same note is
+    // promoted: MIDI 2.0 on key 73 with Pitch 7.9 for 73.42, its Note Off following.
+    Instance r(&kWrapperHost);
+    if (!r.ok()) return;
+    Input in;
+    set19(in);
+    in.param(0, kStep0 + 3, 7);
+    in.midi1(0, 0x90, 72, 100);
+    in.midi1(1, 0x80, 72, 0);
+    const auto out = r.process(in);
+    CHECK(out.size() == 2);
+    if (out.size() == 2) {
+        const uint32_t pitch = 69 * 512 + (84 * 512 + 9) / 19;   // 73.42 in 1/512 semitone
+        CHECK(out[0].type == CLAP_EVENT_MIDI2 && (out[0].words[0] & 0xFFFFFF00u) == 0x40904900u &&
+              (out[0].words[1] & 0xFFFF) + 1 >= pitch && (out[0].words[1] & 0xFFFF) <= pitch + 1);
+        CHECK(out[1].type == CLAP_EVENT_MIDI2 && (out[1].words[0] & 0xFFFFFF00u) == 0x40804900u);
     }
 }
 
@@ -569,6 +587,7 @@ int main(int argc, char** argv) {
     testMidi2();
     testMidi1Promoted();
     testMidi1RoundedWithoutMidi2();
+    testMidi1PromotedInWrapper();
     testHeldNoteAcrossBlocks();
     testClapNotes();
     testState();

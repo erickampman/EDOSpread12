@@ -75,6 +75,7 @@ channel pitch bend, program change, SysEx, clock) passes through unchanged.
 |---|---|---|
 | [StageHand](https://github.com/erickampman/StageHand) | MIDI 2.0 | Yes (Pitch 7.9) |
 | Bitwig | CLAP notes | Yes, to a synth that honours tuning expressions |
+| Logic Pro (the AUv2, in a MIDI FX slot) | MIDI 2.0 | Yes (Pitch 7.9) |
 | Hosts that take no MIDI 2.0 and send MIDI 1.0 | MIDI 1.0 | Rounded to semitones |
 
 The Unlikelyware synths ([PlainOldSynth](https://github.com/erickampman/PlainOldSynth),
@@ -96,7 +97,8 @@ A host that is already running keeps the plugins it loaded: quit and restart it.
 needs, and more on rescanning, is in the downloads repo's [install
 notes](https://github.com/erickampman/unlikelyware#installing). To build EDOSpread12 yourself
 instead, see below; `cmake --build build --target install-clap` then links the build into your CLAP
-folder.
+folder, and on the Mac `--target install-auv2` copies the AUv2 into `~/Library/Audio/Plug-Ins/Components`
+(for Logic's MIDI FX slot; not in the 0.9.0 download).
 
 ## Building from source
 

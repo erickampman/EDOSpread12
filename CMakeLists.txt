@@ -84,21 +84,30 @@ function(edospread12_add_plugin_sources TARGET_NAME)
     endif()
     set_target_properties(${TARGET_NAME} PROPERTIES CXX_VISIBILITY_PRESET hidden VISIBILITY_INLINES_HIDDEN ON)
     if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang|AppleClang")
-        set_source_files_properties(src/plugin.cpp src/UI/EDOSpread12UI.cpp TARGET_DIRECTORY ${TARGET_NAME}
+        set_source_files_properties(src/plugin.cpp TARGET_DIRECTORY ${TARGET_NAME}
             PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra;$<$<CXX_COMPILER_ID:GNU>:-Wno-cpp>")
-    endif()
-    # DGL's libraries keep default visibility, so the linker is told too: clap_entry is the only
-    # export (another plugin's DPF or uw-core in the same host can't bind to ours).
-    if(APPLE)
-        target_link_options(${TARGET_NAME} PRIVATE "LINKER:-exported_symbol,_clap_entry")
-    elseif(UNIX)
-        file(WRITE "${CMAKE_BINARY_DIR}/generated/exports.map" "{ global: clap_entry; local: *; };\n")
-        target_link_options(${TARGET_NAME} PRIVATE "LINKER:--version-script=${CMAKE_BINARY_DIR}/generated/exports.map")
+        # DGL's headers aren't pedantic, and clap-wrapper builds its targets with -Wpedantic
+        # -Werror, so the editor's sources and DPF's turn pedantic off again (as in Retune).
+        set_source_files_properties(src/UI/EDOSpread12UI.cpp TARGET_DIRECTORY ${TARGET_NAME}
+            PROPERTIES COMPILE_OPTIONS "-Wall;-Wextra;-Wno-pedantic;$<$<CXX_COMPILER_ID:GNU>:-Wno-cpp>")
+        set_source_files_properties("${DPF_ROOT_DIR}/distrho/src/DistrhoUI.cpp"
+            "${DPF_ROOT_DIR}/distrho/src/DistrhoUtils.cpp" "${DPF_ROOT_DIR}/distrho/DistrhoUI_macOS.mm"
+            TARGET_DIRECTORY ${TARGET_NAME}
+            PROPERTIES COMPILE_OPTIONS "-Wno-pedantic;$<$<CXX_COMPILER_ID:GNU>:-Wno-cpp>")
     endif()
 endfunction()
 
 add_library(EDOSpread12 MODULE)
 edospread12_add_plugin_sources(EDOSpread12)
+# DGL's libraries keep default visibility, so the linker is told too: clap_entry is the .clap's only
+# export (another plugin's DPF or uw-core in the same host can't bind to ours). Not for the AUv2,
+# whose wrapper exports its own entry point.
+if(APPLE)
+    target_link_options(EDOSpread12 PRIVATE "LINKER:-exported_symbol,_clap_entry")
+elseif(UNIX)
+    file(WRITE "${CMAKE_BINARY_DIR}/generated/exports.map" "{ global: clap_entry; local: *; };\n")
+    target_link_options(EDOSpread12 PRIVATE "LINKER:--version-script=${CMAKE_BINARY_DIR}/generated/exports.map")
+endif()
 
 if(APPLE)
     set_target_properties(EDOSpread12 PROPERTIES
@@ -125,6 +134,48 @@ add_custom_target(install-clap
     DEPENDS EDOSpread12
     VERBATIM
     COMMENT "Symlinking EDOSpread12.clap into ${EDOSPREAD12_CLAP_DIR}")
+
+# --- AUv2 via clap-wrapper (macOS) -------------------------------------------------------------
+# The same plugin, wrapped as a MIDI effect ("aumi", Logic's MIDI FX slot). clap-wrapper is
+# erickampman/clap-wrapper's midi2-auv2-output branch: v0.16.0 (Retune's) plus an AUv2 that keeps a
+# MIDI 2.0 plugin's output whole, so Pitch 7.9 reaches the next plugin in Logic (src/plugin.cpp).
+option(EDOSPREAD12_BUILD_AUV2 "Build EDOSpread12.component (AUv2 MIDI effect) via clap-wrapper (macOS)" ${APPLE})
+if(EDOSPREAD12_BUILD_AUV2 AND NOT APPLE)
+    message(FATAL_ERROR "EDOSPREAD12_BUILD_AUV2 is macOS-only. Reconfigure with -DEDOSPREAD12_BUILD_AUV2=OFF.")
+endif()
+if(EDOSPREAD12_BUILD_AUV2)
+    enable_language(OBJC)   # the wrapper's Objective-C sources
+    set(CLAP_SDK_ROOT "${CMAKE_CURRENT_SOURCE_DIR}/external/clap" CACHE PATH "" FORCE)
+    # clap-wrapper fetches Apple's AudioUnitSDK itself unless AUDIOUNIT_SDK_ROOT names a copy.
+    if(NOT AUDIOUNIT_SDK_ROOT)
+        set(CLAP_WRAPPER_DOWNLOAD_DEPENDENCIES ON)
+    endif()
+    add_subdirectory(external/clap-wrapper EXCLUDE_FROM_ALL)
+
+    add_library(EDOSpread12_auv2 MODULE)
+    edospread12_add_plugin_sources(EDOSpread12_auv2)
+    # "Es12" under Unlikelyware's "nLKL".
+    target_add_auv2_wrapper(
+        TARGET EDOSpread12_auv2
+        OUTPUT_NAME "EDOSpread12"
+        BUNDLE_IDENTIFIER "com.unlikelyware.edospread12.auv2"
+        BUNDLE_VERSION "${PROJECT_VERSION}"
+        MANUFACTURER_NAME "Unlikelyware"
+        MANUFACTURER_CODE "nLKL"
+        SUBTYPE_CODE "Es12"
+        INSTRUMENT_TYPE "aumi")
+
+    # Copied, not symlinked, as in Retune and the synths.
+    set(EDOSPREAD12_AUV2_DIR "$ENV{HOME}/Library/Audio/Plug-Ins/Components")
+    add_custom_target(install-auv2
+        COMMAND ${CMAKE_COMMAND} -E make_directory "${EDOSPREAD12_AUV2_DIR}"
+        COMMAND ${CMAKE_COMMAND} -E rm -rf "${EDOSPREAD12_AUV2_DIR}/EDOSpread12.component"
+        COMMAND ${CMAKE_COMMAND} -E copy_directory
+                "$<TARGET_BUNDLE_DIR:EDOSpread12_auv2>" "${EDOSPREAD12_AUV2_DIR}/EDOSpread12.component"
+        DEPENDS EDOSpread12_auv2
+        VERBATIM
+        COMMENT "Copying EDOSpread12.component into ${EDOSPREAD12_AUV2_DIR}")
+endif()
 
 # --- tools/preview_editor.mm: the editor in a window of its own, no DAW (macOS) ----------------
 if(APPLE)
