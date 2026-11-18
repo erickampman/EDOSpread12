@@ -35,7 +35,7 @@ The defaults (12-EDO, A origin, Nearest) leave every note where it was: EDOSprea
 
 ::: {.callout .callout-note .card}
 ## Getting Started {#getting-started}
-1. **Put EDOSpread12 in front of a synth**: in Bitwig, a note FX before the instrument; in REAPER, before the instrument in the track's FX chain; in Logic Pro, a **MIDI FX** slot on the instrument's channel (the AUv2); in StageHand, the row's **MIDI FX** menu.
+1. **Put EDOSpread12 in front of a synth**: in Bitwig, a note FX before the instrument; in REAPER, before the instrument in the track's FX chain (REAPER plays the steps rounded to semitones, see [Hosts and Microtones](#hosts)); in Logic Pro, a **MIDI FX** slot on the instrument's channel (the AUv2); in StageHand, the row's **MIDI FX** menu.
 2. **Turn EDO** in the Tuning panel, say to 19. All 12 keys are refilled with the **Fill** choice (Nearest), so the keyboard plays the 19-EDO steps nearest the notes you know.
 3. **Play.** Keys you hold light up on the piano and on the circle.
 4. **Move a key:** click it on the piano, then drag its marker round the circle to the step you want.
@@ -188,7 +188,8 @@ What EDOSpread12 receives decides what it can send:
 | StageHand | MIDI 2.0 | The exact step (Pitch 7.9) |
 | Bitwig | CLAP notes | The exact step, from a synth that honours tuning expressions |
 | Logic Pro (the AUv2, in a MIDI FX slot) | MIDI 2.0 | The exact step (Pitch 7.9) |
-| A host that takes no MIDI 2.0 and sends MIDI 1.0 | MIDI 1.0 | The nearest semitone |
+| REAPER (Linux and macOS) | MIDI 1.0 | The nearest semitone: REAPER passes notes between plugins as MIDI 1.0, so even CLAP notes lose their tuning expressions |
+| Any other host that takes no MIDI 2.0 and sends MIDI 1.0 | MIDI 1.0 | The nearest semitone |
 
 - **MIDI 2.0:** a note carries its exact pitch as a Pitch 7.9 attribute; its note number is the whole part, so a receiver that ignores the attribute plays the nearest key below.
 - **MIDI 1.0 in, MIDI 2.0 out:** where the host takes MIDI 2.0, a MIDI 1.0 note that lands between semitones goes out as MIDI 2.0 rather than being rounded. One that lands on a semitone stays MIDI 1.0.

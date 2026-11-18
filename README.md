@@ -76,7 +76,8 @@ channel pitch bend, program change, SysEx, clock) passes through unchanged.
 | [StageHand](https://github.com/erickampman/StageHand) | MIDI 2.0 | Yes (Pitch 7.9) |
 | Bitwig | CLAP notes | Yes, to a synth that honours tuning expressions |
 | Logic Pro (the AUv2, in a MIDI FX slot) | MIDI 2.0 | Yes (Pitch 7.9) |
-| Hosts that take no MIDI 2.0 and send MIDI 1.0 | MIDI 1.0 | Rounded to semitones |
+| REAPER (Linux and macOS) | MIDI 1.0 | Rounded to semitones: REAPER passes notes between plugins as MIDI 1.0, dropping CLAP tuning expressions |
+| Other hosts that take no MIDI 2.0 and send MIDI 1.0 | MIDI 1.0 | Rounded to semitones |
 
 The Unlikelyware synths ([PlainOldSynth](https://github.com/erickampman/PlainOldSynth),
 [StruckSynth](https://github.com/erickampman/StruckSynth) and the rest) play Pitch 7.9 notes.
