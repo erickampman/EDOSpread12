@@ -40,7 +40,7 @@
 #include "uw/ump/Ump.h"
 
 #ifndef EDOSPREAD12_VERSION_STRING
-#define EDOSPREAD12_VERSION_STRING "0.9.0"
+#define EDOSPREAD12_VERSION_STRING "0.9.1"
 #endif
 
 namespace {

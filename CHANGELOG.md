@@ -5,6 +5,8 @@ All notable changes to EDOSpread12. Versions follow the git tags; the format is
 
 ## [Unreleased]
 
+## [0.9.1] - 2026-11-26
+
 ### Added
 
 - An AUv2 MIDI effect on the Mac, for Logic's MIDI FX slot. Built with Unlikelyware's fork of

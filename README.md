@@ -11,9 +11,9 @@ EDOSpread12 makes no sound of its own. It changes the notes going to the synth a
 
 | | |
 |---|---|
-| Format | CLAP |
+| Formats | CLAP. AUv2 (macOS) builds from source; ready-built in 0.9.1 |
 | Platforms | Linux x86-64, macOS 26 or later on Apple Silicon. No Windows |
-| Version | 0.9.0 (preview) |
+| Version | 0.9.1 (preview) |
 | License | MIT |
 
 **Downloads:** ready-built plugins are in the
@@ -99,7 +99,7 @@ needs, and more on rescanning, is in the downloads repo's [install
 notes](https://github.com/erickampman/unlikelyware#installing). To build EDOSpread12 yourself
 instead, see below; `cmake --build build --target install-clap` then links the build into your CLAP
 folder, and on the Mac `--target install-auv2` copies the AUv2 into `~/Library/Audio/Plug-Ins/Components`
-(for Logic's MIDI FX slot; not in the 0.9.0 download).
+(for Logic's MIDI FX slot; in the download from 0.9.1).
 
 ## Building from source
 
