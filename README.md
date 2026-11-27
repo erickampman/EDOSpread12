@@ -79,18 +79,25 @@ channel pitch bend, program change, SysEx, clock) passes through unchanged.
 | REAPER (Linux and macOS) | MIDI 1.0 | Rounded to semitones: REAPER passes notes between plugins as MIDI 1.0, dropping CLAP tuning expressions |
 | Other hosts that take no MIDI 2.0 and send MIDI 1.0 | MIDI 1.0 | Rounded to semitones |
 
+In REAPER, use the CLAP: REAPER doesn't pass on an AU MIDI effect's output, so the AUv2 plays
+nothing into the synth after it. The AUv2 is for Logic's MIDI FX slot.
+
 The Unlikelyware synths ([PlainOldSynth](https://github.com/erickampman/PlainOldSynth),
 [StruckSynth](https://github.com/erickampman/StruckSynth) and the rest) play Pitch 7.9 notes.
 
 ## Installing
 
-The download holds `EDOSpread12.clap`. Put it in your CLAP folder (create the folder if it isn't
-there), then rescan plugins in your host:
+The download holds `EDOSpread12.clap` and, on macOS, `EDOSpread12.component` (AUv2). Put each one
+you need in its format's folder (create the folder if it isn't there), then rescan plugins in your
+host:
 
-| | Linux | macOS |
-|---|---|---|
-| For you | `~/.clap` | `~/Library/Audio/Plug-Ins/CLAP` |
-| For every user | `/usr/lib/clap` | `/Library/Audio/Plug-Ins/CLAP` |
+| Format | Linux, for you | Linux, every user | macOS, for you | macOS, every user |
+|---|---|---|---|---|
+| CLAP | `~/.clap` | `/usr/lib/clap` | `~/Library/Audio/Plug-Ins/CLAP` | `/Library/Audio/Plug-Ins/CLAP` |
+| AUv2 | — | — | `~/Library/Audio/Plug-Ins/Components` | `/Library/Audio/Plug-Ins/Components` |
+
+The `.component` is a bundle (a folder): move it whole. In Logic, the `.component` goes in the MIDI
+FX slot.
 
 On macOS, `~/Library` is hidden in Finder: Go ▸ Go to Folder opens it.
 
@@ -98,8 +105,8 @@ A host that is already running keeps the plugins it loaded: quit and restart it.
 needs, and more on rescanning, is in the downloads repo's [install
 notes](https://github.com/erickampman/unlikelyware#installing). To build EDOSpread12 yourself
 instead, see below; `cmake --build build --target install-clap` then links the build into your CLAP
-folder, and on the Mac `--target install-auv2` copies the AUv2 into `~/Library/Audio/Plug-Ins/Components`
-(for Logic's MIDI FX slot; in the download from 0.9.1).
+folder, and on the Mac `--target install-auv2` copies the AUv2 into
+`~/Library/Audio/Plug-Ins/Components`.
 
 ## Building from source
 
